@@ -1,0 +1,42 @@
+{
+  "name": "app",
+  "private": true,
+  "scripts": {
+    "start": "meteor run --settings settings.json"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.0.0-beta.51",
+    "@material-ui/core": "^1.2.1",
+    "@material-ui/icons": "^1.1.0",
+    "lodash": "^4.17.10",
+    "meteor-node-stubs": "^0.4.1",
+    "moment": "^2.22.2",
+    "object-path": "^0.11.4",
+    "prop-types": "^15.6.1",
+    "raven": "^2.6.2",
+    "raven-js": "^3.26.2",
+    "react": "^16.4.1",
+    "react-bootstrap": "^0.32.1",
+    "react-dom": "^16.4.1",
+    "react-helmet": "^5.2.0",
+    "react-jss": "^8.5.1",
+    "react-redux": "^5.0.7",
+    "react-router": "^4.3.1",
+    "react-router-dom": "^4.3.1",
+    "redux": "^4.0.0",
+    "simpl-schema": "^1.5.0",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "@meteorjs/eslint-config-meteor": "^1.0.5",
+    "@xch/meteor-create-react-component": "^0.1.0",
+    "babel-eslint": "^8.2.3",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-import-resolver-meteor": "^0.4.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-meteor": "^5.0.0",
+    "eslint-plugin-react": "^7.9.1"
+  }
+}

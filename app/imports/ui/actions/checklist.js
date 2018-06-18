@@ -1,0 +1,439 @@
+import objectPath from 'object-path';
+import { Meteor } from 'meteor/meteor';
+import { Tracker } from 'meteor/tracker';
+
+import handleStorage from '/imports/handle-storage';
+import {
+  getAction,
+  registerAction,
+  actionSpecificReducer,
+} from '/imports/ui/redux-store';
+import Checklists from '/imports/api/checklists/collections';
+import {
+  createNew as createNewChecklist,
+} from '/imports/api/checklists/methods';
+import {
+  basicInfo as checklistSchema,
+} from '/imports/api/checklists/schema';
+
+const wrapJsonFriendlyChecklistDocument = (originalDoc) => {
+  if (!originalDoc) {
+    return null;
+  }
+
+  return {
+    ...originalDoc,
+
+    createDate: Number(originalDoc.createDate),
+    modifyDate: Number(originalDoc.modifyDate),
+  };
+};
+
+registerAction({
+  type: 'data.checklists.subscribe',
+  schema: {
+    onListUpdate: Function,
+  },
+  reducer: (state, {
+    onListUpdate,
+  }) => {
+    const handleOfSubscription = Meteor.subscribe(
+      'checklists.all',
+    );
+    const handleIdOfSubscription = handleStorage.deposit(handleOfSubscription);
+    const handleOfTracker = Tracker.autorun(() => {
+      const checklistDocsCursor = Checklists.find({}, {
+        sort: { createDate: -1 },
+      });
+
+      if (handleOfSubscription.ready() && checklistDocsCursor) {
+        const checklistDocs = checklistDocsCursor.fetch();
+
+        onListUpdate(checklistDocs);
+      }
+    });
+    const handleIdOfTracker = handleStorage.deposit(handleOfTracker);
+
+    return {
+      ...state,
+      'data.checklists.loading': true,
+      'data.checklists.subscribed': true,
+      'data.checklists.handleIdOfSubscription': handleIdOfSubscription,
+      'data.checklists.handleIdOfTracker': handleIdOfTracker,
+    };
+  },
+});
+
+registerAction({
+  type: 'data.checklists.terminateSubscription',
+  reducer: (state) => {
+    const handleOfSubscription = handleStorage.withdraw(state['data.checklists.handleIdOfSubscription']);
+
+    handleOfSubscription && handleOfSubscription.stop();
+
+    const handleOfTracker = handleStorage.withdraw(state['data.checklists.handleIdOfTracker']);
+
+    handleOfTracker && handleOfTracker.stop();
+
+    return {
+      ...state,
+      'data.checklists.loading': false,
+      'data.checklists.subscribed': false,
+      'data.checklists.handleIdOfSubscription': null,
+      'data.checklists.handleIdOfTracker': null,
+    };
+  },
+});
+
+registerAction({
+  type: 'data.checklists.update',
+  schema: {
+    list: {
+      type: Array,
+    },
+    'list.$': {
+      type: Object,
+      blackbox: true,
+    },
+  },
+  reducer: (state, {
+    list,
+  }) => {
+    const mapOfChecklists = {};
+
+    const listOfChecklists = list.map(({
+      _id,
+      name,
+      createDate,
+      modifyDate,
+    }) => ({
+      _id,
+      name,
+      createDate,
+      modifyDate,
+    }));
+
+    return {
+      ...state,
+      'data.checklists.items': listOfChecklists,
+      'data.checklists.ready': true,
+      'data.checklists.loading': false,
+      'data.checklists.subscribed': true,
+    };
+  },
+});
+
+registerAction({
+  type: 'data.checklists.createNew',
+  schema: {
+    checklist: checklistSchema,
+    onReady: Function,
+    onError: Function,
+  },
+  reducer: (state, {
+    checklist,
+    onReady,
+    onError,
+  }) => {
+    createNewChecklist.callPromise(checklist)
+    .then(onReady, onError);
+
+    return state;
+  },
+});
+
+registerAction({
+  type: 'data.checklists.document.subscribe',
+  schema: {
+    idOfchecklist: String,
+    onDocumentUpdate: Function,
+  },
+  scopePath: [
+    'data.checklists.documents',
+  ],
+  reducer: (scopedState, {
+    idOfchecklist,
+    onDocumentUpdate,
+  }) => {
+    const documentInfo = scopedState[idOfchecklist];
+
+    if (documentInfo) {
+      const isDocumentLoaded = objectPath.get(documentInfo, 'ready', false);
+      const loadedDocument = documentInfo.source;
+      const isDocumentNotFound = isDocumentLoaded && !loadedDocument;
+
+      // If document is determined to be 404, do not start subscription.
+      if (isDocumentNotFound) {
+        return scopedState;
+      }
+    }
+
+    const handleOfSubscription = Meteor.subscribe(
+      'checklist.full',
+      {
+        idOfchecklist,
+      },
+      {
+        onStop: (error) => {
+          if (error) {
+            // Subscription is stopped by server error.
+          } else {
+            // Subscription is stopped normally.
+          }
+        },
+      }
+    );
+    const handleIdOfSubscription = handleStorage.deposit(handleOfSubscription);
+    const handleOfTracker = Tracker.autorun(() => {
+      const checklistDocsCursor = Checklists.find({
+        _id: idOfchecklist,
+      });
+
+      if (handleOfSubscription.ready() && checklistDocsCursor) {
+        const checklistDoc = checklistDocsCursor.fetch()[0];
+
+        onDocumentUpdate(checklistDoc);
+      }
+    });
+    const handleIdOfTracker = handleStorage.deposit(handleOfTracker);
+
+    return {
+      ...scopedState,
+
+      [idOfchecklist]: {
+        ...documentInfo,
+
+        id: idOfchecklist,
+        loading: true,
+        subscribed: true,
+        handleIdOfSubscription: handleIdOfSubscription,
+        handleIdOfTracker: handleIdOfTracker,
+      },
+    };
+  },
+});
+
+registerAction({
+  type: 'data.checklists.document.terminateSubscription',
+  schema: {
+    idOfchecklist: String,
+  },
+  scopePath: [
+    'data.checklists.documents',
+  ],
+  reducer: (scopedState, {
+    idOfchecklist,
+  }) => {
+    const documentInfo = scopedState[idOfchecklist];
+
+    // If document is never loaded, do nothing.
+    if (!documentInfo) {
+      return scopedState;
+    }
+
+    const nextDocumentInfo = {...documentInfo};
+
+    if (documentInfo.handleIdOfSubscription) {
+      const handleOfSubscription = handleStorage.withdraw(documentInfo.handleIdOfSubscription);
+
+      if (handleOfSubscription) {
+        handleOfSubscription.stop();
+      }
+    }
+
+    if (documentInfo.handleIdOfTracker) {
+      const handleOfTracker = handleStorage.withdraw(documentInfo.handleIdOfTracker);
+
+      if (handleOfTracker) {
+        handleOfTracker.stop();
+      }
+    }
+
+    return {
+      ...scopedState,
+
+      [idOfchecklist]: {
+        ...documentInfo,
+
+        handleIdOfSubscription: null,
+        handleIdOfTracker: null,
+      },
+    };
+  },
+});
+
+registerAction({
+  type: 'data.checklists.document.updateLocal',
+  schema: {
+    idOfchecklist: String,
+    document: {
+      type: Object,
+      blackbox: true,
+    },
+  },
+  scopePath: [
+    'data.checklists.documents',
+  ],
+  reducer: (scopedState, {
+    idOfchecklist,
+    document,
+  }) => {
+    const documentInfo = scopedState[idOfchecklist];
+
+    if (documentInfo) {
+      const isDocumentLoading = objectPath.get(documentInfo, 'loading', false);
+      const isDocumentSubscribed = objectPath.get(documentInfo, 'subscribed', false);
+      const isPendingDocumentUpdate = isDocumentLoading || isDocumentSubscribed;
+
+      // Do nothing if the document is not subscribed nor being loaded.
+      if (!isPendingDocumentUpdate) {
+        return scopedState;
+      }
+    }
+
+    return {
+      ...scopedState,
+
+      [idOfchecklist]: {
+        ...documentInfo,
+
+        loading: false,
+        ready: true,
+        lastUpdated: Date.now(),
+        source: wrapJsonFriendlyChecklistDocument(document),
+      },
+    };
+  },
+});
+
+// registerAction({
+//   type: 'data.checklists.document.submitChangesToServer',
+//   schema: {
+//     idOfchecklist: String,
+//     changes: {
+//       type: Object,
+//       blackbox: true,
+//     },
+//   },
+//   reducer: (state) => {
+
+//   },
+// });
+
+registerAction({
+  type: 'data.checklists.document.loadFromSsr',
+  schema: {
+    idOfchecklist: String,
+    document: {
+      type: Object,
+      optional: true,
+      blackbox: true,
+    },
+  },
+  scopePath: [
+    'data.checklists.documents',
+  ],
+  reducer: (scopedState, {
+    idOfchecklist,
+    document,
+  }) => {
+    return {
+      ...scopedState,
+
+      [idOfchecklist]: {
+        id: idOfchecklist,
+        loading: false,
+        subscribed: false,
+        ready: true,
+        lastUpdated: Date.now(),
+        source: wrapJsonFriendlyChecklistDocument(document),
+      },
+    };
+  },
+});
+
+registerAction({
+  type: 'ui.checklist.createNew',
+  schema: {
+    onReady: Function,
+    onError: Function,
+  },
+  reducer: (state, {
+    onReady,
+    onError,
+  }) => {
+    return {
+      ...actionSpecificReducer(state, {
+        type: getAction('data.checklists.createNew').type,
+        checklist: {},
+        onReady,
+        onError,
+      }),
+
+      'ui.checklist.creatingNewChecklist': true,
+    };
+  },
+});
+
+registerAction({
+  type: 'ui.checklist.recordNewlyCreatedChecklist',
+  schema: {
+    docId: String,
+  },
+  reducer: (state, {
+    docId,
+  }) => {
+    return {
+      ...state,
+
+      'ui.checklist.creatingNewChecklist': false,
+      'ui.checklist.idOfNewlyCreatedChecklist': docId,
+    };
+  },
+});
+
+registerAction({
+  type: 'ui.checklist.recordErrorWhenCreatingNewChecklist',
+  schema: {
+    error: {
+      type: Error,
+      blackbox: true,
+      optional: true,
+    },
+  },
+  reducer: (state, {
+    error,
+  }) => {
+    return {
+      ...state,
+
+      'ui.checklist.creatingNewChecklist': false,
+      'ui.checklist.errorWhenCreatingNewChecklist': {
+        name: error.name,
+        message: error.message,
+      },
+    };
+  },
+});
+
+registerAction({
+  type: 'ui.checklist.markNewlyCreatedChecklistAsOpen',
+  schema: {
+    idOfchecklist: String,
+  },
+  reducer: (state, {
+    idOfchecklist,
+  }) => {
+    if (idOfchecklist && idOfchecklist !== state['ui.checklist.idOfNewlyCreatedChecklist']) {
+      return state;
+    }
+
+    return {
+      ...state,
+
+      'ui.checklist.creatingNewChecklist': false,
+      'ui.checklist.idOfNewlyCreatedChecklist': null,
+      'ui.checklist.errorWhenCreatingNewChecklist': null,
+    };
+  },
+});
