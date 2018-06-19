@@ -26,7 +26,10 @@ class FullScreenSpinner extends React.PureComponent {
           }
         }}
       >
-        <CircularProgress />
+        <CircularProgress
+          size={64}
+          thickness={4}
+        />
       </Dialog>
     );
   }

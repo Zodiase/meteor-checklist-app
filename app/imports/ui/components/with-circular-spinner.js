@@ -6,7 +6,7 @@ export default
   const {
     spinnerProps: {
       show: showSpinner = false,
-      size: spinnerSize = 32,
+      size: spinnerSize = 40,
       color: spinnerColor = 'primary',
       style: spinnerStyle,
       ...otherSpinnerProps
@@ -44,6 +44,7 @@ export default
 
           transition: 'opacity 60ms ease-out 0.9s',
           opacity: showSpinner ? 1 : 0,
+          pointerEvents: 'none',
 
           ...spinnerStyle,
         }}

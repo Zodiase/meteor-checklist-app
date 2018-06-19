@@ -20,6 +20,10 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
+import {
+  voidChecklistName,
+} from '/imports/ui/consts';
+
 import FullScreenSpinner from '/imports/ui/components/full-screen-spinner';
 
 export default
@@ -52,8 +56,6 @@ class HomePage extends React.Component {
   onClickCreateChecklist = () => {
     this.props.requestToCreateNewChecklist();
   };
-
-  renderLinkedListItem = (props) => <Link {...props} />;
 
   render () {
     const {
@@ -108,17 +110,17 @@ class HomePage extends React.Component {
           <List>
             {listOfChecklists.map(({
               _id,
-              name = 'Untitled checklist',
+              name,
               createDate,
             }) => (
               <ListItem
                 key={_id}
                 button
-                component={this.renderLinkedListItem}
+                component={Link}
                 to={`/checklist/${_id}`}
               >
                 <ListItemText
-                  primary={name}
+                  primary={name || voidChecklistName}
                   secondary={moment.duration(moment(createDate).diff(dateNow)).humanize(true)}
                 />
               </ListItem>

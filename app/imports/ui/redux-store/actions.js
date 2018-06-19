@@ -89,7 +89,9 @@ const getReducerForAction = ({type, ...payload}) => {
 
   if (schema) {
     try {
-      schema.validate(payload);
+      const cleanedPayload = schema.clean(payload);
+
+      schema.validate(cleanedPayload);
     } catch (error) {
       error.message = `Invalid action: ${type}. ${error.message}`;
       throw error;

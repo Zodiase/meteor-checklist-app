@@ -9,7 +9,7 @@ import HomePage from '/imports/ui/components/page-main';
 import ChecklistPage from '/imports/ui/components/page-checklist';
 import {
   getAll as getAllChecklists,
-  getOneById as getOneChecklistById,
+  findById as findChecklistById,
 } from '/imports/api/checklists/methods';
 import {
   store as globalStateStore,
@@ -43,11 +43,12 @@ const routeConfigs = [
 
       const idOfchecklist = objectPath.get(props, 'match.params.id');
 
-      const checklist = idOfchecklist && await getOneChecklistById.callPromise({
+      const checklist = idOfchecklist && await findChecklistById.callPromise({
         id: idOfchecklist,
       });
 
       if (!checklist) {
+        console.error(`Checklist 404: ${idOfchecklist}`);
         // 404.
         dispatch({
           type: getAction('data.checklists.document.loadFromSsr').type,
@@ -68,13 +69,14 @@ const routeConfigs = [
 
 export
 const initializingReduxStoreForRouteSsr = async (store, location) => {
-  const matchedRoute = routeConfigs.find((config) => matchPath(location.href, config.routeProps));
+  const routePath = location.pathname;
+  const matchedRoute = routeConfigs.find((config) => matchPath(routePath, config.routeProps));
 
   if (!matchedRoute || !matchedRoute.initializingData) {
     return;
   }
 
-  const match = matchPath(location.href, matchedRoute.routeProps);
+  const match = matchPath(routePath, matchedRoute.routeProps);
 
   return await matchedRoute.initializingData(store.dispatch, {
     match,

@@ -15,17 +15,28 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Snackbar from '@material-ui/core/Snackbar';
+
 import BackIcon from '@material-ui/icons/KeyboardArrowLeft';
 import SaveIcon from '@material-ui/icons/CloudUpload';
 import CheckIcon from '@material-ui/icons/Check';
-
-import WithCircularSpinner from '/imports/ui/components/with-circular-spinner';
+import AddIcon from '@material-ui/icons/Add';
 
 import {
-  basicInfo as checklistSchema,
+  voidChecklistName,
+} from '/imports/ui/consts';
+
+import {
+  ClientSideCreationSchema,
 } from '/imports/api/checklists/schema';
 
 const isSubset = (objA, objB) => {
@@ -46,18 +57,26 @@ class ChecklistPage extends React.Component {
     isLoadingChecklistDocument: PropTypes.bool.isRequired,
     isChecklistDocumentLoaded: PropTypes.bool.isRequired,
     checklistDocument: PropTypes.shape({
-      name: PropTypes.string,
+      name: PropTypes.string.isRequired,
     }),
     isNewlyCreatedChecklist: PropTypes.bool.isRequired,
+    isWaitingConfirmationOfNewStep: PropTypes.bool.isRequired,
+    errorWhenCreatingNewStep: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      message: PropTypes.string.isRequired,
+    }),
 
     markNewlyCreatedChecklistAsOpen: PropTypes.func.isRequired,
     subscribeChecklist: PropTypes.func.isRequired,
     stopSubscriptionOfChecklist: PropTypes.func.isRequired,
     modifyChecklist: PropTypes.func.isRequired,
+    addStepToChecklist: PropTypes.func.isRequired,
+    acknowledgeErrorWhenCreatingNewStep: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
     checklistDocument: null,
+    errorWhenCreatingNewStep: null,
   };
 
   static getDerivedStateFromProps(props, state) {
@@ -107,7 +126,7 @@ class ChecklistPage extends React.Component {
       moreState.updateDateOfChecklistDocument = props.updateDateOfChecklistDocument;
 
       // Reduce `mapOfEditsToChecklistDocument` by removing properties that are present and identical on the (new) original copy.
-      const listOfMinimalChanges = Object.entries(checklistSchema.clean(state.mapOfEditsToChecklistDocument))
+      const listOfMinimalChanges = Object.entries(ClientSideCreationSchema.clean(state.mapOfEditsToChecklistDocument))
       .filter(([key, value]) => !isEqual(value, props.checklistDocument[key]));
 
       moreState.mapOfEditsToChecklistDocumentIsDirty = listOfMinimalChanges.length > 0;
@@ -132,6 +151,15 @@ class ChecklistPage extends React.Component {
       console.error('Unexpected Exception. Checklist was deleted externally.');
     }
 
+    if (
+      // Has error
+      props.errorWhenCreatingNewStep
+      // and is a different one
+      && !isEqual(props.errorWhenCreatingNewStep, state.copyOfTheLastErrorWhenCreatingNewStep)
+    ) {
+      moreState.copyOfTheLastErrorWhenCreatingNewStep = cloneDeep(props.errorWhenCreatingNewStep);
+    }
+
     return moreState;
   }
 
@@ -145,6 +173,8 @@ class ChecklistPage extends React.Component {
       updateDateOfChecklistDocument: 0,
       mapOfEditsToChecklistDocument: null,
       mapOfEditsToChecklistDocumentIsDirty: false,
+      textOfTheDescriptionOfTheNewStep: '',
+      copyOfTheLastErrorWhenCreatingNewStep: null,
     };
   }
 
@@ -225,8 +255,31 @@ class ChecklistPage extends React.Component {
   };
 
   onChangeTitle = (event) => {
-    console.log('event.target.value', event.target.value);
     this.setChecklistProperty('name', event.target.value);
+  };
+
+  onChangeDescriptionOfNewStep = (event) => {
+    this.setState({
+      textOfTheDescriptionOfTheNewStep: event.target.value,
+    });
+  };
+
+  onSubmitNewStep = (event) => {
+    event.preventDefault();
+
+    const descriptionOfNewStep = this.state.textOfTheDescriptionOfTheNewStep;
+
+    this.props.addStepToChecklist({
+      description: descriptionOfNewStep,
+    });
+
+    this.setState({
+      textOfTheDescriptionOfTheNewStep: '',
+    });
+  };
+
+  onAcknowledgeErrorWhenCreatingNewStep = () => {
+    this.props.acknowledgeErrorWhenCreatingNewStep();
   };
 
   render () {
@@ -236,22 +289,26 @@ class ChecklistPage extends React.Component {
       isChecklistDocumentLoaded,
       checklistDocument,
       isNewlyCreatedChecklist,
+      isWaitingConfirmationOfNewStep,
+      errorWhenCreatingNewStep,
     } = this.props;
     const {
       inTitleEditMode,
       copyOfOriginalChecklistDocument,
       mapOfEditsToChecklistDocumentIsDirty,
+      textOfTheDescriptionOfTheNewStep,
+      copyOfTheLastErrorWhenCreatingNewStep,
     } = this.state;
 
-    const checklistName = this.getCleanChecklistProperty('name', 'Untitled checklist');
-    const titleString = this.getDirtyChecklistProperty('name', '');
+    const cleanChecklistName = this.getCleanChecklistProperty('name', '');
+    const dirtyChecklistName = this.getDirtyChecklistProperty('name', '');
 
     return (
       <div>
         <Helmet>
           <title>Loading...</title>
           {isChecklistDocumentLoaded && checklistDocument && (
-            <title>{checklistName}</title>
+            <title>{cleanChecklistName || voidChecklistName}</title>
           )}
         </Helmet>
 
@@ -264,11 +321,16 @@ class ChecklistPage extends React.Component {
 
         <AppBar position="static">
           <Toolbar>
-            <Link className={classes['appBarBackButton.link']} to="/">
-              <IconButton className={classes['appBarBackButton.root']} color="inherit" aria-label="Back">
-                <BackIcon />
-              </IconButton>
-            </Link>
+            <IconButton
+              className={classes['appBarBackButton.root']}
+              color="inherit"
+              aria-label="Back"
+              component={Link}
+              to="/"
+            >
+              <BackIcon />
+            </IconButton>
+
             <Typography variant="title" color="inherit" style={{flex: 1}}>
               {isChecklistDocumentLoaded && checklistDocument && !inTitleEditMode && (
                 <Button
@@ -276,13 +338,13 @@ class ChecklistPage extends React.Component {
                     root: classes.appBarTitleButton,
                   }}
                   onClick={this.onClickTitle}
-                >{checklistName}</Button>
+                >{cleanChecklistName || voidChecklistName}</Button>
               )}
               {isChecklistDocumentLoaded && checklistDocument && inTitleEditMode && (
                 <TextField
                   autoFocus={isNewlyCreatedChecklist}
-                  placeholder="Untitled checklist"
-                  value={titleString}
+                  placeholder={voidChecklistName}
+                  value={dirtyChecklistName}
                   onChange={this.onChangeTitle}
                   margin="none"
                   InputProps={{
@@ -290,6 +352,21 @@ class ChecklistPage extends React.Component {
                       root: classes['appBarTitleTextField.root'],
                       underline: classes['appBarTitleTextField.underline'],
                     },
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <CircularProgress
+                          size={24}
+                          thickness={5}
+                          color="inherit"
+                          variant={mapOfEditsToChecklistDocumentIsDirty ? 'indeterminate' : 'determinate'}
+                          value={mapOfEditsToChecklistDocumentIsDirty ? 0 : 100}
+                          style={{
+                            transition: 'opacity 60ms ease-out 0.9s',
+                            opacity: mapOfEditsToChecklistDocumentIsDirty ? 1 : 0,
+                          }}
+                        />
+                      </InputAdornment>
+                    ),
                   }}
                   fullWidth
                 />
@@ -298,23 +375,6 @@ class ChecklistPage extends React.Component {
                 <span>Loading...</span>
               )}
             </Typography>
-
-            <WithCircularSpinner
-              spinnerProps={{
-                show: mapOfEditsToChecklistDocumentIsDirty,
-                color: 'inherit',
-                size: 40,
-              }}
-              style={{
-                paddingLeft: 16,
-                paddingRight: 16,
-                opacity: mapOfEditsToChecklistDocumentIsDirty ? 1: 0,
-                transition: 'opacity 60ms ease-out 1s',
-              }}
-            >
-              {mapOfEditsToChecklistDocumentIsDirty && <SaveIcon />}
-              {!mapOfEditsToChecklistDocumentIsDirty && <CheckIcon />}
-            </WithCircularSpinner>
           </Toolbar>
         </AppBar>
         <div className={classes['appBarLoadingProgress.wrapper']}>
@@ -326,6 +386,83 @@ class ChecklistPage extends React.Component {
             />
           )}
         </div>
+
+        <List>
+          {isChecklistDocumentLoaded
+          && checklistDocument
+          && checklistDocument.steps.map(({
+            id,
+            description,
+          }) => (
+            <ListItem
+              key={id}
+              button
+            >
+              <ListItemText
+                primary={description}
+              />
+            </ListItem>
+          ))}
+
+          <form
+            onSubmit={this.onSubmitNewStep}
+          >
+            <ListItem>
+              <ListItemIcon>
+                <AddIcon />
+              </ListItemIcon>
+
+              <TextField
+                disabled={isWaitingConfirmationOfNewStep}
+                placeholder="New step"
+                value={textOfTheDescriptionOfTheNewStep}
+                onChange={this.onChangeDescriptionOfNewStep}
+                margin="none"
+                fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Button
+                        disabled={isWaitingConfirmationOfNewStep}
+                        size="small"
+                        type="submit"
+                      >Create</Button>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </ListItem>
+          </form>
+        </List>
+
+        <pre>{JSON.stringify(checklistDocument, null, 2)}</pre>
+
+        <Snackbar
+          key="error-of-creating-new-step"
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          open={errorWhenCreatingNewStep !== null}
+          onClose={this.onAcknowledgeErrorWhenCreatingNewStep}
+          ContentProps={{
+            'aria-describedby': 'error-when-creating-new-step',
+          }}
+          message={(
+            <span id="error-when-creating-new-step">
+              {objectPath.get(copyOfTheLastErrorWhenCreatingNewStep, 'message')}
+            </span>
+          )}
+          action={[
+            <Button
+              key="confirm"
+              color="inherit"
+              size="small"
+              onClick={this.onAcknowledgeErrorWhenCreatingNewStep}
+            >OK</Button>,
+          ]}
+        />
+
       </div>
     );
   }

@@ -1,5 +1,6 @@
 import defer from 'lodash/defer';
 import debounce from 'lodash/debounce';
+import uuid from 'uuid/v4';
 import {
   connect,
 } from 'react-redux';
@@ -17,6 +18,7 @@ import {
 
 import {
   update as updateChecklist,
+  addStep as addStepToChecklist,
 } from '/imports/api/checklists/methods';
 
 import Component from './component';
@@ -60,6 +62,8 @@ export default connect(
     const updateDateOfChecklistDocument = objectPath.get(state, ['data.checklists.documents', idOfchecklist, 'lastUpdated'], 0);
     const idOfNewlyCreatedChecklist = objectPath.get(state, ['ui.checklist.idOfNewlyCreatedChecklist']);
     const isNewlyCreatedChecklist = idOfchecklist === idOfNewlyCreatedChecklist;
+    const isWaitingConfirmationOfNewStep = objectPath.get(state, ['ui.checklist.waitingConfirmationOfNewStep'], false);
+    const errorWhenCreatingNewStep = objectPath.get(state, ['ui.checklist.errorWhenCreatingNewStep'], null);
 
     return {
       idOfchecklist,
@@ -68,6 +72,8 @@ export default connect(
       checklistDocument,
       updateDateOfChecklistDocument,
       isNewlyCreatedChecklist,
+      isWaitingConfirmationOfNewStep,
+      errorWhenCreatingNewStep,
     };
   },
   // mapDispatchToProps
@@ -112,6 +118,32 @@ export default connect(
           changes,
         });
       }, 2000),
+      addStepToChecklist: (stepObj) => {
+        dispatch({
+          type: getAction('ui.checklist.startWaitingConfirmationOfNewStep').type,
+        });
+
+        addStepToChecklist.call({
+          idOfchecklist,
+          step: {
+            ...stepObj,
+            id: uuid(),
+          },
+        }, (error, response) => {
+          dispatch({
+            type: getAction('ui.checklist.handleResponseFromCreatingNewStep').type,
+            idOfchecklist,
+            step: stepObj,
+            error,
+            response,
+          });
+        });
+      },
+      acknowledgeErrorWhenCreatingNewStep: () => {
+        dispatch({
+          type: getAction('ui.checklist.acknowledgeErrorWhenCreatingNewStep').type,
+        });
+      },
     };
   },
 )(withStyles(styles)(Component));

@@ -13,7 +13,8 @@ import {
   createNew as createNewChecklist,
 } from '/imports/api/checklists/methods';
 import {
-  basicInfo as checklistSchema,
+  StepSchema,
+  ClientSideCreationSchema,
 } from '/imports/api/checklists/schema';
 
 const wrapJsonFriendlyChecklistDocument = (originalDoc) => {
@@ -38,7 +39,7 @@ registerAction({
     onListUpdate,
   }) => {
     const handleOfSubscription = Meteor.subscribe(
-      'checklists.all',
+      'checklists.index',
     );
     const handleIdOfSubscription = handleStorage.deposit(handleOfSubscription);
     const handleOfTracker = Tracker.autorun(() => {
@@ -126,7 +127,7 @@ registerAction({
 registerAction({
   type: 'data.checklists.createNew',
   schema: {
-    checklist: checklistSchema,
+    checklist: ClientSideCreationSchema,
     onReady: Function,
     onError: Function,
   },
@@ -306,20 +307,6 @@ registerAction({
   },
 });
 
-// registerAction({
-//   type: 'data.checklists.document.submitChangesToServer',
-//   schema: {
-//     idOfchecklist: String,
-//     changes: {
-//       type: Object,
-//       blackbox: true,
-//     },
-//   },
-//   reducer: (state) => {
-
-//   },
-// });
-
 registerAction({
   type: 'data.checklists.document.loadFromSsr',
   schema: {
@@ -365,7 +352,10 @@ registerAction({
     return {
       ...actionSpecificReducer(state, {
         type: getAction('data.checklists.createNew').type,
-        checklist: {},
+        checklist: {
+          name: '',
+          steps: [],
+        },
         onReady,
         onError,
       }),
@@ -376,42 +366,55 @@ registerAction({
 });
 
 registerAction({
-  type: 'ui.checklist.recordNewlyCreatedChecklist',
+  type: 'ui.checklist.createNewChecklist.markStart',
   schema: {
-    docId: String,
+    newChecklist: ClientSideCreationSchema,
   },
-  reducer: (state, {
-    docId,
-  }) => {
+  reducer: (state) => {
     return {
       ...state,
 
-      'ui.checklist.creatingNewChecklist': false,
-      'ui.checklist.idOfNewlyCreatedChecklist': docId,
+      'ui.checklist.creatingNewChecklist': true,
     };
   },
 });
 
 registerAction({
-  type: 'ui.checklist.recordErrorWhenCreatingNewChecklist',
+  type: 'ui.checklist.createNewChecklist.handleResponse',
   schema: {
+    newChecklist: ClientSideCreationSchema,
     error: {
       type: Error,
+      blackbox: true,
+      optional: true,
+    },
+    response: {
+      type: Object,
       blackbox: true,
       optional: true,
     },
   },
   reducer: (state, {
     error,
+    response,
   }) => {
+    if (error) {
+      return {
+        ...state,
+
+        'ui.checklist.creatingNewChecklist': false,
+        'ui.checklist.errorWhenCreatingNewChecklist': {
+          name: error.name,
+          message: error.message,
+        },
+      };
+    }
+
     return {
       ...state,
 
       'ui.checklist.creatingNewChecklist': false,
-      'ui.checklist.errorWhenCreatingNewChecklist': {
-        name: error.name,
-        message: error.message,
-      },
+      'ui.checklist.idOfNewlyCreatedChecklist': response._id,
     };
   },
 });
@@ -434,6 +437,88 @@ registerAction({
       'ui.checklist.creatingNewChecklist': false,
       'ui.checklist.idOfNewlyCreatedChecklist': null,
       'ui.checklist.errorWhenCreatingNewChecklist': null,
+    };
+  },
+});
+
+registerAction({
+  type: 'ui.checklist.startWaitingConfirmationOfNewStep',
+  reducer: (state, {
+    idOfchecklist,
+  }) => {
+    return {
+      ...state,
+
+      'ui.checklist.waitingConfirmationOfNewStep': true,
+    };
+  },
+});
+
+registerAction({
+  type: 'ui.checklist.handleResponseFromCreatingNewStep',
+  schema: {
+    idOfchecklist: String,
+    step: {
+      type: Object,
+      blackbox: true,
+    },
+    error: {
+      type: Error,
+      blackbox: true,
+      optional: true,
+    },
+    response: {
+      type: Object,
+      blackbox: true,
+      optional: true,
+    },
+  },
+  reducer: (state, {
+    error,
+    response,
+  }) => {
+
+    if (error) {
+      const uiError = {
+        name: 'unknown',
+        message: 'Unexpected error',
+      };
+
+      if (error.error === 'validation-error' && error.details && error.details.length > 0) {
+        uiError.name = 'ValidationError';
+        uiError.message = error.details[0].message;
+      }
+
+      if (uiError.name === 'unknown') {
+        console.error('Unexpected error when creating new step', error);
+      }
+
+      return {
+        ...state,
+
+        'ui.checklist.waitingConfirmationOfNewStep': false,
+        'ui.checklist.errorWhenCreatingNewStep': uiError,
+      };
+    }
+
+    console.warn('handle response', response);
+
+    return {
+      ...state,
+
+      'ui.checklist.waitingConfirmationOfNewStep': false,
+      'ui.checklist.errorWhenCreatingNewStep': null,
+    };
+  },
+});
+
+registerAction({
+  type: 'ui.checklist.acknowledgeErrorWhenCreatingNewStep',
+  reducer: (state) => {
+    return {
+      ...state,
+
+      'ui.checklist.errorWhenCreatingNewStep': null,
     };
   },
 });

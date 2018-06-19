@@ -48,8 +48,48 @@ Meteor.publish('checklists.all', () => {
   console.log('Publication `checklists.all` subscribed.');
 
   return Checklists.find({}, {
-    sort: { createDate: -1 },
+    sort: {
+      createDate: -1,
+    },
   });
+});
+
+Meteor.publish('checklists.index', function () {
+  console.log('Publication `checklists.index` subscribed.');
+
+  const transform = (doc) => {
+    console.log('transforming', doc);
+    return {
+      ...doc,
+    };
+  };
+  const publication = this;
+  const selector = {};
+  const sort = {
+    createDate: -1,
+  };
+  const fields = {
+    name: 1,
+    createDate: 1,
+  };
+  const cursor = Checklists.find(selector, { sort, fields });
+  const observer = cursor.observe({
+    added: (document) => {
+      publication.added(Checklists._name, document._id, transform(document));
+    },
+    changed: function (newDocument, oldDocument) {
+      publication.changed(Checklists._name, oldDocument._id, transform(newDocument));
+    },
+    removed: function (oldDocument) {
+      publication.removed(Checklists._name, oldDocument._id);
+    }
+  });
+
+  publication.onStop(function () {
+    observer.stop();
+  });
+
+  publication.ready();
 });
 
 Meteor.publish('checklist.full', ({

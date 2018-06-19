@@ -1,12 +1,11 @@
 import SimpleSchema from 'simpl-schema';
 
-import {
-  createMethod,
-} from '/imports/helpers';
+import createMethod from '../create-method';
 
 import Checklists from './';
 import {
-  basicInfo as checklistSchema,
+  StepSchema,
+  ClientSideCreationSchema,
 } from './schema';
 
 export
@@ -19,7 +18,7 @@ const count = createMethod({
 
 export
 const getAll = createMethod({
-  name: 'checklists.methods.get-all',
+  name: 'checklists.methods.getAll',
   method: () => {
     return Checklists.find({}, {
       sort: { createDate: -1 },
@@ -28,8 +27,8 @@ const getAll = createMethod({
 });
 
 export
-const getOneById = createMethod({
-  name: 'checklists.methods.get-one-by-id',
+const findById = createMethod({
+  name: 'checklists.methods.findById',
   schema: {
     id: String,
   },
@@ -42,16 +41,20 @@ const getOneById = createMethod({
 
 export
 const createNew = createMethod({
-  name: 'checklists.methods.create-new',
-  schema: checklistSchema,
-  method: (checklist) => {
-    const date = new Date();
+  name: 'checklists.methods.createNew',
+  schema: ClientSideCreationSchema,
+  method (checklist) {
+    console.log('checklists.methods.createNew', checklist);
 
-    const docId = Checklists.insert({
+    const date = new Date();
+    const fullDocument = {
       ...checklist,
+
       createDate: date,
       modifyDate: date,
-    });
+    };
+
+    const docId = Checklists.insert(fullDocument);
 
     return {
       _id: docId,
@@ -64,17 +67,67 @@ const update = createMethod({
   name: 'checklists.methods.update',
   schema: {
     id: String,
-    changes: checklistSchema,
+    changes: ClientSideCreationSchema,
   },
   method: ({ id, changes }) => {
     console.log('checklists.methods.update', id, changes);
 
-    return Checklists.update({
+    const updateCount = Checklists.update({
       _id: id,
     }, {
       $set: {
         ...changes,
       },
     });
+
+    return {
+      success: updateCount > 0,
+    };
   },
 });
+
+export
+const addStep = createMethod({
+  name: 'checklists.methods.addStep',
+  schema: {
+    idOfchecklist: String,
+    step: StepSchema,
+  },
+  method: ({
+    idOfchecklist,
+    step,
+  }) => {
+    console.log('checklists.methods.addStep', idOfchecklist, step);
+
+    const updateCount = Checklists.update({
+      _id: idOfchecklist,
+    }, {
+      $push: {
+        steps: step,
+      },
+    });
+
+    return {
+      success: updateCount > 0,
+      step,
+    };
+  },
+});
+
+// Checklists.update({
+//   _id: 'WTut4wETne2cCvqGd',
+// }, {
+//   $set: {
+//     steps: [],
+//   }
+// });
+
+// Checklists.update({}, {
+//   $pull: {
+//     id: {
+//       $exists: false,
+//     }
+//   },
+// }, {
+//   multi: true,
+// });

@@ -1,6 +1,8 @@
-import schema from './schema';
+import {
+  StoredSchema,
+} from './schema';
 import Collection from './collections';
 
-Collection.attachSchema(schema);
+Collection.attachSchema(StoredSchema);
 
 export default Collection;
