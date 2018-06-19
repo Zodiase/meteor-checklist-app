@@ -19,7 +19,7 @@ import {
 
 import Component from './component';
 
-const styles = {
+const styles = (theme) => ({
   ...appBarLoadingProgress,
   flex: {
     flex: 1,
@@ -28,7 +28,14 @@ const styles = {
     width: 20,
     height: 20,
   },
-};
+  'selectionCountBadge.root': {
+    marginRight: theme.spacing.unit * 2,
+  },
+  'selectionCountBadge.badge': {
+    backgroundColor: 'white',
+    color: 'black',
+  },
+});
 
 export default connect(
   // mapStateToProps
@@ -39,12 +46,22 @@ export default connect(
     const isInEditMode = objectPath.get(state, ['ui.checklist.list.inEditMode'], false);
     const isCreatingNewChecklist = objectPath.get(state, ['ui.checklist.creatingNewChecklist'], false);
     const idOfNewlyCreatedChecklist = objectPath.get(state, ['ui.checklist.idOfNewlyCreatedChecklist']);
-    const selectionInEditMode = isInEditMode && objectPath.get(state, ['ui.checklist.list.editMode.selection'], {});
+    const selectionInEditMode = isInEditMode && objectPath.get(state, ['ui.checklist.list.editMode.selection'], {}) || {};
     const isItemSelectedInEditMode = (itemId) => {
       const isItemSelected = objectPath.get(selectionInEditMode, [itemId], false);
 
       return isItemSelected;
     };
+    const listOfSelectedItemsInEditMode = [
+      isChecklistListDataReady,
+      listOfChecklists,
+      isInEditMode,
+    ].every(Boolean)
+    && (
+      listOfChecklists.filter((doc) => isItemSelectedInEditMode(doc._id))
+      .map((doc) => doc._id)
+    )
+    || [];
 
     return {
       isChecklistListDataLoading, 
@@ -53,6 +70,8 @@ export default connect(
       isInEditMode,
       isCreatingNewChecklist,
       idOfNewlyCreatedChecklist,
+      listOfSelectedItemsInEditMode,
+
       isItemSelectedInEditMode,
     };
   },
@@ -68,10 +87,10 @@ export default connect(
         type: getAction('ui.checklist.listEditMode.exit').type,
       });
     },
-    selectItemInEditMode: (itemId) => {
+    toggleItemSelectionInEditMode: (itemIds) => {
       dispatch({
-        type: getAction('ui.checklist.listEditMode.selectItem').type,
-        itemId,
+        type: getAction('ui.checklist.listEditMode.toggleItemSelection').type,
+        itemIds,
       });
     },
     requestToCreateNewChecklist: () => {

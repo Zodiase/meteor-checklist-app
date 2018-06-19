@@ -363,19 +363,23 @@ registerAction({
 });
 
 registerAction({
-  type: 'ui.checklist.listEditMode.selectItem',
+  type: 'ui.checklist.listEditMode.toggleItemSelection',
   schema: {
-    itemId: String,
+    itemIds: [String],
   },
   reducer: (state, {
-    itemId,
+    itemIds,
   }) => {
     const selection = objectPath.get(state, ['ui.checklist.list.editMode.selection'], {});
-    const isItemSelected = objectPath.get(selection, [itemId], false);
-    const newSelection = {
-      ...selection,
-      [itemId]: !isItemSelected,
-    };
+
+    const newSelection = itemIds.reduce((acc, itemId) => {
+      const isItemSelected = objectPath.get(selection, [itemId], false);
+
+      return {
+        ...acc,
+        [itemId]: !isItemSelected,
+      };
+    }, selection);
 
     return {
       ...state,

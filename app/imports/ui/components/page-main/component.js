@@ -8,20 +8,21 @@ import {
   Redirect,
   Link,
 } from 'react-router-dom';
-import Button from 'react-bootstrap/lib/Button';
-import FormControl from 'react-bootstrap/lib/FormControl';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Checkbox from '@material-ui/core/Checkbox';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Badge from '@material-ui/core/Badge';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
+import SelectAllIcon from '@material-ui/icons/SelectAll';
 
 import {
   voidChecklistName,
@@ -38,19 +39,21 @@ class HomePage extends React.Component {
     isInEditMode: PropTypes.bool.isRequired,
     isCreatingNewChecklist: PropTypes.bool.isRequired,
     idOfNewlyCreatedChecklist: PropTypes.string,
+    listOfSelectedItemsInEditMode: PropTypes.arrayOf(PropTypes.string),
 
     requestToCreateNewChecklist: PropTypes.func.isRequired,
     subscribeChecklists: PropTypes.func.isRequired,
     stopSubscriptionOfChecklists: PropTypes.func.isRequired,
     enterEditMode: PropTypes.func.isRequired,
     exitEditMode: PropTypes.func.isRequired,
-    selectItemInEditMode: PropTypes.func.isRequired,
+    toggleItemSelectionInEditMode: PropTypes.func.isRequired,
     isItemSelectedInEditMode: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
     listOfChecklists: null,
     idOfNewlyCreatedChecklist: '',
+    listOfSelectedItemsInEditMode: [],
   };
 
   componentDidMount () {
@@ -74,7 +77,32 @@ class HomePage extends React.Component {
   };
 
   onSelectItem = (itemId) => {
-    this.props.selectItemInEditMode(itemId);
+    this.props.toggleItemSelectionInEditMode([itemId]);
+  };
+
+  onClickSelectAllItemsInEditModeButton = () => {
+    const {
+      listOfChecklists,
+      listOfSelectedItemsInEditMode,
+      isItemSelectedInEditMode,
+    } = this.props;
+
+    if (!listOfChecklists) {
+      return;
+    }
+
+    if (listOfSelectedItemsInEditMode.length < listOfChecklists.length) {
+      // Select the rest.
+      const listOfItemsToSelect = listOfChecklists.filter((doc) => !isItemSelectedInEditMode(doc._id));
+      const listOfItemIds = listOfItemsToSelect.map((doc) => doc._id);
+
+      this.props.toggleItemSelectionInEditMode(listOfItemIds);
+    } else {
+      // Deselect all.
+      const listOfItemIds = listOfChecklists.map((doc) => doc._id);
+
+      this.props.toggleItemSelectionInEditMode(listOfItemIds);
+    }
   };
 
   render () {
@@ -86,6 +114,7 @@ class HomePage extends React.Component {
       isInEditMode,
       isCreatingNewChecklist,
       idOfNewlyCreatedChecklist,
+      listOfSelectedItemsInEditMode,
 
       isItemSelectedInEditMode,
     } = this.props;
@@ -111,32 +140,51 @@ class HomePage extends React.Component {
               Checklists
             </Typography>
 
-            {!isInEditMode && (
+            {!isInEditMode && <React.Fragment>
               <IconButton
                 onClick={this.onClickCreateChecklist}
                 color="inherit"
               >
                 <AddIcon />
               </IconButton>
-            )}
 
-            {!isInEditMode && (
               <IconButton
                 onClick={this.onClickEnterEditModeButton}
                 color="inherit"
               >
                 <EditIcon />
               </IconButton>
-            )}
+            </React.Fragment>}
 
-            {isInEditMode && (
+            {isInEditMode && <React.Fragment>
+              <Badge
+                classes={{
+                  root: classes['selectionCountBadge.root'],
+                  badge: classes['selectionCountBadge.badge'],
+                }}
+                color="secondary"
+                badgeContent={(
+                  <Typography
+                    variant="button"
+                    color="inherit"
+                  >{listOfSelectedItemsInEditMode.length}</Typography>
+                )}
+              > </Badge>
+
+              <IconButton
+                onClick={this.onClickSelectAllItemsInEditModeButton}
+                color="inherit"
+              >
+                <SelectAllIcon />
+              </IconButton>
+
               <IconButton
                 onClick={this.onClickExitEditModeButton}
                 color="inherit"
               >
                 <CloseIcon />
               </IconButton>
-            )}
+            </React.Fragment>}
           </Toolbar>
         </AppBar>
         <div className={classes['appBarLoadingProgress.wrapper']}>
