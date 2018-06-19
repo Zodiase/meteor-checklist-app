@@ -340,6 +340,52 @@ registerAction({
 });
 
 registerAction({
+  type: 'ui.checklist.listEditMode.enter',
+  reducer: (state) => {
+    return {
+      ...state,
+
+      'ui.checklist.list.inEditMode': true,
+    };
+  },
+});
+
+registerAction({
+  type: 'ui.checklist.listEditMode.exit',
+  reducer: (state) => {
+    return {
+      ...state,
+
+      'ui.checklist.list.inEditMode': false,
+      'ui.checklist.list.editMode.selection': null,
+    };
+  },
+});
+
+registerAction({
+  type: 'ui.checklist.listEditMode.selectItem',
+  schema: {
+    itemId: String,
+  },
+  reducer: (state, {
+    itemId,
+  }) => {
+    const selection = objectPath.get(state, ['ui.checklist.list.editMode.selection'], {});
+    const isItemSelected = objectPath.get(selection, [itemId], false);
+    const newSelection = {
+      ...selection,
+      [itemId]: !isItemSelected,
+    };
+
+    return {
+      ...state,
+
+      'ui.checklist.list.editMode.selection': newSelection,
+    };
+  },
+});
+
+registerAction({
   type: 'ui.checklist.createNew',
   schema: {
     onReady: Function,

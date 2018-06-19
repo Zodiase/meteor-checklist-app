@@ -14,11 +14,14 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/Add';
+import Checkbox from '@material-ui/core/Checkbox';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import AddIcon from '@material-ui/icons/Add';
+import EditIcon from '@material-ui/icons/Edit';
+import CloseIcon from '@material-ui/icons/Close';
 
 import {
   voidChecklistName,
@@ -32,12 +35,17 @@ class HomePage extends React.Component {
     isChecklistListDataLoading: PropTypes.bool.isRequired,
     isChecklistListDataReady: PropTypes.bool.isRequired,
     listOfChecklists: PropTypes.arrayOf(PropTypes.object),
+    isInEditMode: PropTypes.bool.isRequired,
     isCreatingNewChecklist: PropTypes.bool.isRequired,
     idOfNewlyCreatedChecklist: PropTypes.string,
 
     requestToCreateNewChecklist: PropTypes.func.isRequired,
     subscribeChecklists: PropTypes.func.isRequired,
     stopSubscriptionOfChecklists: PropTypes.func.isRequired,
+    enterEditMode: PropTypes.func.isRequired,
+    exitEditMode: PropTypes.func.isRequired,
+    selectItemInEditMode: PropTypes.func.isRequired,
+    isItemSelectedInEditMode: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -57,14 +65,29 @@ class HomePage extends React.Component {
     this.props.requestToCreateNewChecklist();
   };
 
+  onClickEnterEditModeButton = () => {
+    this.props.enterEditMode();
+  };
+
+  onClickExitEditModeButton = () => {
+    this.props.exitEditMode();
+  };
+
+  onSelectItem = (itemId) => {
+    this.props.selectItemInEditMode(itemId);
+  };
+
   render () {
     const {
       classes,
       isChecklistListDataLoading,
       isChecklistListDataReady,
       listOfChecklists,
+      isInEditMode,
       isCreatingNewChecklist,
       idOfNewlyCreatedChecklist,
+
+      isItemSelectedInEditMode,
     } = this.props;
 
     const dateNow = Date.now();
@@ -88,12 +111,32 @@ class HomePage extends React.Component {
               Checklists
             </Typography>
 
-            <IconButton
-              onClick={this.onClickCreateChecklist}
-              color="inherit"
-            >
-              <AddIcon />
-            </IconButton>
+            {!isInEditMode && (
+              <IconButton
+                onClick={this.onClickCreateChecklist}
+                color="inherit"
+              >
+                <AddIcon />
+              </IconButton>
+            )}
+
+            {!isInEditMode && (
+              <IconButton
+                onClick={this.onClickEnterEditModeButton}
+                color="inherit"
+              >
+                <EditIcon />
+              </IconButton>
+            )}
+
+            {isInEditMode && (
+              <IconButton
+                onClick={this.onClickExitEditModeButton}
+                color="inherit"
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
           </Toolbar>
         </AppBar>
         <div className={classes['appBarLoadingProgress.wrapper']}>
@@ -116,9 +159,23 @@ class HomePage extends React.Component {
               <ListItem
                 key={_id}
                 button
-                component={Link}
-                to={`/checklist/${_id}`}
+                {...(isInEditMode && {
+                  onClick: () => this.onSelectItem(_id),
+                })}
+                {...(!isInEditMode && {
+                  component: Link,
+                  to: `/checklist/${_id}`,
+                })}
               >
+                {isInEditMode && (
+                  <Checkbox
+                    className={classes.editModeSelectionCheckbox}
+                    checked={isItemSelectedInEditMode(_id)}
+                    tabIndex={-1}
+                    disableRipple
+                  />
+                )}
+
                 <ListItemText
                   primary={name || voidChecklistName}
                   secondary={moment.duration(moment(createDate).diff(dateNow)).humanize(true)}
