@@ -15,6 +15,7 @@ import {
 
 import {
   createNew as createNewChecklist,
+  remove as removeChecklists,
 } from '/imports/api/checklists/methods';
 
 import Component from './component';
@@ -29,11 +30,13 @@ const styles = (theme) => ({
     height: 20,
   },
   'selectionCountBadge.root': {
-    marginRight: theme.spacing.unit * 2,
   },
   'selectionCountBadge.badge': {
     backgroundColor: 'white',
     color: 'black',
+    position: 'static',
+    top: false,
+    right: false,
   },
 });
 
@@ -110,6 +113,13 @@ export default connect(
           error,
           response,
         });
+      });
+    },
+    requestToRemoveChecklists: (idOfChecklists) => {
+      //! Need to remove these items from selection.
+
+      removeChecklists.call({
+        ids: idOfChecklists,
       });
     },
     subscribeChecklists: () => {

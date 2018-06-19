@@ -23,6 +23,7 @@ import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import SelectAllIcon from '@material-ui/icons/SelectAll';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import {
   voidChecklistName,
@@ -42,6 +43,7 @@ class HomePage extends React.Component {
     listOfSelectedItemsInEditMode: PropTypes.arrayOf(PropTypes.string),
 
     requestToCreateNewChecklist: PropTypes.func.isRequired,
+    requestToRemoveChecklists: PropTypes.func.isRequired,
     subscribeChecklists: PropTypes.func.isRequired,
     stopSubscriptionOfChecklists: PropTypes.func.isRequired,
     enterEditMode: PropTypes.func.isRequired,
@@ -85,6 +87,7 @@ class HomePage extends React.Component {
       listOfChecklists,
       listOfSelectedItemsInEditMode,
       isItemSelectedInEditMode,
+      toggleItemSelectionInEditMode,
     } = this.props;
 
     if (!listOfChecklists) {
@@ -96,13 +99,22 @@ class HomePage extends React.Component {
       const listOfItemsToSelect = listOfChecklists.filter((doc) => !isItemSelectedInEditMode(doc._id));
       const listOfItemIds = listOfItemsToSelect.map((doc) => doc._id);
 
-      this.props.toggleItemSelectionInEditMode(listOfItemIds);
+      toggleItemSelectionInEditMode(listOfItemIds);
     } else {
       // Deselect all.
       const listOfItemIds = listOfChecklists.map((doc) => doc._id);
 
-      this.props.toggleItemSelectionInEditMode(listOfItemIds);
+      toggleItemSelectionInEditMode(listOfItemIds);
     }
+  };
+
+  onClickDeleteSelectedInEditModeButton = () => {
+    const {
+      listOfSelectedItemsInEditMode,
+      requestToRemoveChecklists,
+    } = this.props;
+
+    requestToRemoveChecklists(listOfSelectedItemsInEditMode);
   };
 
   render () {
@@ -157,6 +169,14 @@ class HomePage extends React.Component {
             </React.Fragment>}
 
             {isInEditMode && <React.Fragment>
+              <IconButton
+                disabled={!listOfSelectedItemsInEditMode.length}
+                onClick={this.onClickDeleteSelectedInEditModeButton}
+                color="inherit"
+              >
+                <DeleteIcon />
+              </IconButton>
+
               <Badge
                 classes={{
                   root: classes['selectionCountBadge.root'],
