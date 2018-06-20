@@ -162,6 +162,11 @@ class HomePage extends React.Component {
               </IconButton>
 
               <IconButton
+                disabled={![
+                  isChecklistListDataReady,
+                  listOfChecklists,
+                  listOfChecklists.length > 0,
+                ].every(Boolean)}
                 onClick={this.onClickEnterEditModeButton}
                 color="inherit"
               >
