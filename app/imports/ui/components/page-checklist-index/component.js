@@ -4,6 +4,7 @@ import {
   Helmet,
 } from 'react-helmet';
 import moment from 'moment';
+import pluralize from 'pluralize';
 import {
   Redirect,
   Link,
@@ -36,7 +37,11 @@ class ChecklistIndexPage extends React.Component {
   static propTypes = {
     isChecklistListDataLoading: PropTypes.bool.isRequired,
     isChecklistListDataReady: PropTypes.bool.isRequired,
-    listOfChecklists: PropTypes.arrayOf(PropTypes.object),
+    listOfChecklists: PropTypes.arrayOf(PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      stepCount: PropTypes.number.isRequired,
+    })),
     isInEditMode: PropTypes.bool.isRequired,
     isCreatingNewChecklist: PropTypes.bool.isRequired,
     idOfNewlyCreatedChecklist: PropTypes.string,
@@ -284,7 +289,7 @@ class ChecklistIndexPage extends React.Component {
           {listOfChecklists.map(({
             _id,
             name,
-            createDate,
+            stepCount,
           }) => (
             <ListItem
               key={_id}
@@ -308,7 +313,7 @@ class ChecklistIndexPage extends React.Component {
 
               <ListItemText
                 primary={name || voidChecklistName}
-                secondary={moment.duration(moment(createDate).diff(dateNow)).humanize(true)}
+                secondary={pluralize('step', stepCount, true)}
               />
             </ListItem>
           ))}

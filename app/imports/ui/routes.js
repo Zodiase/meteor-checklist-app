@@ -9,7 +9,7 @@ import Head from '/imports/ui/components/head';
 import ChecklistIndexPage from '/imports/ui/components/page-checklist-index';
 import ChecklistItemPage from '/imports/ui/components/page-checklist-item';
 import {
-  getAll as getAllChecklists,
+  getAllForIndex as getAllChecklists,
   findById as findChecklistById,
 } from '/imports/api/checklists/methods';
 import {

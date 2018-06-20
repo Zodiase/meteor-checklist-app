@@ -34,6 +34,23 @@ const StoredSchema = new SimpleSchema({
     defaultValue: [],
   },
   'steps.$': StepSchema,
+  stepCount: {
+    type: Number,
+    optional: true,
+    autoValue () {
+      const {
+        isSet,
+        value,
+        operator,
+      } = this.field('steps');
+
+      if (isSet && operator === null) {
+        return value.length;
+      }
+
+      return -1;
+    },
+  },
 });
 
 export
@@ -45,11 +62,18 @@ const ClientSideCreationSchema = StoredSchema.pick(
 
 export
 // Schema of the checklist when displayed in an index (no detail).
-const IndexSchema = new SimpleSchema({
+const IndexSchema = StoredSchema.omit('steps')
+.extend({
   stepCount: {
     type: Number,
-    optional: true,
-    autoValue: (doc) => doc.steps.length,
+    autoValue: null,
   },
 });
-IndexSchema.extend(StoredSchema.omit('steps'));
+
+export
+const transformForIndex = (doc) => {
+  const fullDoc = StoredSchema.clean(doc);
+  const cleanedDoc = IndexSchema.clean(fullDoc);
+
+  return cleanedDoc;
+};

@@ -43,6 +43,8 @@ registerAction({
     );
     const handleIdOfSubscription = handleStorage.deposit(handleOfSubscription);
     const handleOfTracker = Tracker.autorun(() => {
+      console.group(`Autorun for subscription ${handleIdOfSubscription}`);
+
       const checklistDocsCursor = Checklists.find({}, {
         sort: { createDate: -1 },
       });
@@ -50,8 +52,11 @@ registerAction({
       if (handleOfSubscription.ready() && checklistDocsCursor) {
         const checklistDocs = checklistDocsCursor.fetch();
 
+        console.log('new checklist docs', checklistDocs);
+
         onListUpdate(checklistDocs);
       }
+      console.groupEnd();
     });
     const handleIdOfTracker = handleStorage.deposit(handleOfTracker);
 
@@ -100,23 +105,9 @@ registerAction({
   reducer: (state, {
     list,
   }) => {
-    const mapOfChecklists = {};
-
-    const listOfChecklists = list.map(({
-      _id,
-      name,
-      createDate,
-      modifyDate,
-    }) => ({
-      _id,
-      name,
-      createDate,
-      modifyDate,
-    }));
-
     return {
       ...state,
-      'data.checklists.items': listOfChecklists,
+      'data.checklists.items': list,
       'data.checklists.ready': true,
       'data.checklists.loading': false,
       'data.checklists.subscribed': true,

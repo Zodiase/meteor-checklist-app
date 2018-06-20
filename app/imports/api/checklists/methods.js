@@ -6,6 +6,7 @@ import Checklists from './';
 import {
   StepSchema,
   ClientSideCreationSchema,
+  transformForIndex,
 } from './schema';
 
 export
@@ -22,6 +23,19 @@ const getAll = createMethod({
   method: () => {
     return Checklists.find({}, {
       sort: { createDate: -1 },
+    }).fetch();
+  },
+});
+
+export
+const getAllForIndex = createMethod({
+  name: 'checklists.methods.getAllForIndex',
+  method: () => {
+    return Checklists.find({}, {
+      sort: {
+        createDate: -1,
+      },
+      transform: transformForIndex,
     }).fetch();
   },
 });

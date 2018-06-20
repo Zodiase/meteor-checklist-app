@@ -4,6 +4,9 @@ import Checklists, {
   countCollection as ChecklistCount,
   selectors,
 } from './collections';
+import {
+  transformForIndex,
+} from './schema';
 
 // Publish the current size of the collection.
 Meteor.publish('checklists.count', function () {
@@ -57,28 +60,19 @@ Meteor.publish('checklists.all', () => {
 Meteor.publish('checklists.index', function () {
   console.log('Publication `checklists.index` subscribed.');
 
-  const transform = (doc) => {
-    console.log('transforming', doc);
-    return {
-      ...doc,
-    };
-  };
   const publication = this;
   const selector = {};
   const sort = {
     createDate: -1,
   };
-  const fields = {
-    name: 1,
-    createDate: 1,
-  };
+  const fields = {};
   const cursor = Checklists.find(selector, { sort, fields });
   const observer = cursor.observe({
     added: (document) => {
-      publication.added(Checklists._name, document._id, transform(document));
+      publication.added(Checklists._name, document._id, transformForIndex(document));
     },
     changed: function (newDocument, oldDocument) {
-      publication.changed(Checklists._name, oldDocument._id, transform(newDocument));
+      publication.changed(Checklists._name, oldDocument._id, transformForIndex(newDocument));
     },
     removed: function (oldDocument) {
       publication.removed(Checklists._name, oldDocument._id);
