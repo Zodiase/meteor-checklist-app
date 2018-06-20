@@ -32,7 +32,7 @@ import {
 import FullScreenSpinner from '/imports/ui/components/full-screen-spinner';
 
 export default
-class HomePage extends React.Component {
+class ChecklistIndexPage extends React.Component {
   static propTypes = {
     isChecklistListDataLoading: PropTypes.bool.isRequired,
     isChecklistListDataReady: PropTypes.bool.isRequired,
