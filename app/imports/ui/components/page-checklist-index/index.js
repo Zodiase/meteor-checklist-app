@@ -25,6 +25,7 @@ const styles = (theme) => ({
   flex: {
     flex: 1,
   },
+  disabled: {},
   editModeSelectionCheckbox: {
     width: 20,
     height: 20,
@@ -38,6 +39,11 @@ const styles = (theme) => ({
     top: false,
     right: false,
   },
+  appBarIconButton: {
+    color: 'inherit',
+  },
+  appBarDefault: {},
+  appBarInEditMode: {},
 });
 
 export default connect(

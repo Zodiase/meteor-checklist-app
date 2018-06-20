@@ -147,7 +147,18 @@ class ChecklistIndexPage extends React.Component {
           />
         )}
 
-        <AppBar position="static">
+        <AppBar
+          classes={{
+            colorDefault: (
+              isInEditMode
+              ? classes.appBarInEditMode
+              : classes.appBarDefault
+            ),
+          }}
+          color="default"
+          position="static"
+          elevation={0}
+        >
           <Toolbar>
             <Typography variant="title" color="inherit" className={classes.flex}>
               {pageTitle}
@@ -155,20 +166,24 @@ class ChecklistIndexPage extends React.Component {
 
             {!isInEditMode && <React.Fragment>
               <IconButton
+                classes={{
+                  root: classes.appBarIconButton,
+                }}
                 onClick={this.onClickCreateChecklist}
-                color="inherit"
               >
                 <AddIcon />
               </IconButton>
 
               <IconButton
+                classes={{
+                  root: classes.appBarIconButton,
+                }}
                 disabled={![
                   isChecklistListDataReady,
                   listOfChecklists,
                   listOfChecklists.length > 0,
                 ].every(Boolean)}
                 onClick={this.onClickEnterEditModeButton}
-                color="inherit"
               >
                 <EditIcon />
               </IconButton>
@@ -176,9 +191,11 @@ class ChecklistIndexPage extends React.Component {
 
             {isInEditMode && <React.Fragment>
               <IconButton
+                classes={{
+                  root: classes.appBarIconButton,
+                }}
                 disabled={!listOfSelectedItemsInEditMode.length}
                 onClick={this.onClickDeleteSelectedInEditModeButton}
-                color="inherit"
               >
                 <DeleteIcon />
               </IconButton>
@@ -198,15 +215,19 @@ class ChecklistIndexPage extends React.Component {
               > </Badge>
 
               <IconButton
+                classes={{
+                  root: classes.appBarIconButton,
+                }}
                 onClick={this.onClickSelectAllItemsInEditModeButton}
-                color="inherit"
               >
                 <SelectAllIcon />
               </IconButton>
 
               <IconButton
+                classes={{
+                  root: classes.appBarIconButton,
+                }}
                 onClick={this.onClickExitEditModeButton}
-                color="inherit"
               >
                 <CloseIcon />
               </IconButton>
