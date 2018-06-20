@@ -1,18 +1,34 @@
 import React from 'react';
-import { renderToString } from 'react-dom/server';
-import { StaticRouter } from 'react-router';
-// `react-jss` is dependency of `@material-ui/core`.
+import {
+  renderToString,
+} from 'react-dom/server';
+import {
+  StaticRouter,
+} from 'react-router';
+import createHistory from 'history/createMemoryHistory';
 import {
   JssProvider,
   SheetsRegistry,
 } from 'react-jss';
-import { Provider } from 'react-redux';
+import {
+  Provider,
+} from 'react-redux';
+import {
+  connectRouter,
+  routerMiddleware,
+} from 'connected-react-router';
 import PropTypes from 'prop-types';
-import { Helmet } from 'react-helmet';
+import {
+  Helmet,
+} from 'react-helmet';
 import objectPath from 'object-path';
 import Raven from 'raven';
-import { Meteor } from 'meteor/meteor';
-import { onPageLoad } from 'meteor/server-render';
+import {
+  Meteor,
+} from 'meteor/meteor';
+import {
+  onPageLoad,
+} from 'meteor/server-render';
 import {
   MuiThemeProvider,
   createMuiTheme,
@@ -24,7 +40,7 @@ import routes, {
 } from '/imports/ui/routes';
 import {
   createStore,
-  setGlobalStore,
+  rootReducer,
 } from '/imports/ui/redux-store';
 
 import '/imports/api/checklists/publications';
@@ -40,7 +56,16 @@ import '/imports/api/checklists/publications';
 })(objectPath.get(Meteor.settings, 'sentry.dsn'));
 
 onPageLoad(async (sink) => {
-  const globalStateStore = createStore();
+  const clientLocation = sink.request.url;
+  const history = createHistory();
+  history.push(clientLocation.href);
+
+  const finalReducer = connectRouter(history)(rootReducer);
+  const globalStateStore = createStore(finalReducer, {
+    middlewares: [
+      routerMiddleware(history),
+    ],
+  });
   const sheetsRegistry = new SheetsRegistry();
   const generateClassName = createGenerateClassName();
   const context = {};
@@ -67,11 +92,11 @@ onPageLoad(async (sink) => {
     </JssProvider>
   );
 
-  await initializingReduxStoreForRouteSsr(globalStateStore, sink.request.url);
+  await initializingReduxStoreForRouteSsr(globalStateStore, clientLocation);
 
   const initialHtml = renderToString((
     <App
-      location={sink.request.url}
+      location={clientLocation}
       jssRegistry={sheetsRegistry}
       jssClassNameGenerator={generateClassName}
       jssCache={new Map()}

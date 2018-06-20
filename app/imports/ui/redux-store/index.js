@@ -8,6 +8,7 @@ import {
   registerAction,
   actionSpecificReducer,
 } from './actions';
+import rootReducer from './reducer';
 
 export {
   createStore,
@@ -17,4 +18,6 @@ export {
   getAction,
   registerAction,
   actionSpecificReducer,
+
+  rootReducer,
 };

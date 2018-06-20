@@ -1,11 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Switch } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import {
+  Switch,
+} from 'react-router-dom';
+import createHistory from 'history/createBrowserHistory';
+import {
+  Provider,
+} from 'react-redux';
+import {
+  connectRouter,
+  routerMiddleware,
+  ConnectedRouter,
+} from 'connected-react-router';
 import Raven from 'raven-js';
 import objectPath from 'object-path';
-import { Meteor } from 'meteor/meteor';
-import { onPageLoad } from 'meteor/server-render';
+import {
+  Meteor,
+} from 'meteor/meteor';
+import {
+  onPageLoad,
+} from 'meteor/server-render';
 import {
   MuiThemeProvider,
   createMuiTheme,
@@ -16,6 +30,7 @@ import routes from '/imports/ui/routes';
 import {
   createStore,
   setGlobalStore,
+  rootReducer,
 } from '/imports/ui/redux-store';
 
 ((sentryDsn) => {
@@ -41,11 +56,11 @@ class App extends React.Component {
     return (
       <MuiThemeProvider theme={this.props.theme}>
         <Provider store={this.props.store}>
-          <BrowserRouter>
+          <ConnectedRouter history={this.props.history}>
             <Switch>
               {routes}
             </Switch>
-          </BrowserRouter>
+          </ConnectedRouter>
         </Provider>
       </MuiThemeProvider>
     );
@@ -53,7 +68,13 @@ class App extends React.Component {
 }
 
 onPageLoad(() => {
-  const globalStateStore = createStore();
+  const history = createHistory();
+  const finalReducer = connectRouter(history)(rootReducer);
+  const globalStateStore = createStore(finalReducer, {
+    middlewares: [
+      routerMiddleware(history),
+    ],
+  });
   const theme = createMuiTheme({});
 
   setGlobalStore(globalStateStore);
@@ -61,6 +82,7 @@ onPageLoad(() => {
     <App
       store={globalStateStore}
       theme={theme}
+      history={history}
     />
   ), document.getElementById('app'));
 });
