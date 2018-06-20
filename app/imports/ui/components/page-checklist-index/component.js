@@ -117,54 +117,42 @@ class ChecklistIndexPage extends React.Component {
     requestToRemoveChecklists(listOfSelectedItemsInEditMode);
   };
 
-  render () {
+  renderAppBar () {
     const {
       classes,
       isChecklistListDataLoading,
       isChecklistListDataReady,
       listOfChecklists,
       isInEditMode,
-      isCreatingNewChecklist,
-      idOfNewlyCreatedChecklist,
       listOfSelectedItemsInEditMode,
-
-      isItemSelectedInEditMode,
     } = this.props;
 
     const pageTitle = 'Checklists';
-    const dateNow = Date.now();
 
-    return (
-      <div>
-        <Helmet>
-          <title>{pageTitle}</title>
-        </Helmet>
+    return <React.Fragment>
+      <Helmet>
+        <title>{pageTitle}</title>
+      </Helmet>
 
-        {idOfNewlyCreatedChecklist && (
-          <Redirect
-            push
-            to={`/checklist/${idOfNewlyCreatedChecklist}`}
-          />
-        )}
-
-        <AppBar
-          classes={{
-            colorDefault: (
-              isInEditMode
-              ? classes.appBarInEditMode
-              : classes.appBarDefault
-            ),
-          }}
-          color="default"
-          position="static"
-          elevation={0}
-        >
-          <Toolbar>
+      <AppBar
+        classes={{
+          colorDefault: (
+            isInEditMode
+            ? classes.appBarInEditMode
+            : classes.appBarDefault
+          ),
+        }}
+        color="default"
+        position="static"
+        elevation={0}
+      >
+        {!isInEditMode && (
+          <Toolbar key="toolbar-default">
             <Typography variant="title" color="inherit" className={classes.flex}>
               {pageTitle}
             </Typography>
 
-            {!isInEditMode && <React.Fragment>
+            <React.Fragment>
               <IconButton
                 classes={{
                   root: classes.appBarIconButton,
@@ -187,9 +175,17 @@ class ChecklistIndexPage extends React.Component {
               >
                 <EditIcon />
               </IconButton>
-            </React.Fragment>}
+            </React.Fragment>
+          </Toolbar>
+        )}
 
-            {isInEditMode && <React.Fragment>
+        {isInEditMode && (
+          <Toolbar key="toolbar-editmode">
+            <Typography variant="title" color="inherit" className={classes.flex}>
+              {pageTitle}
+            </Typography>
+
+            <React.Fragment>
               <IconButton
                 classes={{
                   root: classes.appBarIconButton,
@@ -231,59 +227,111 @@ class ChecklistIndexPage extends React.Component {
               >
                 <CloseIcon />
               </IconButton>
-            </React.Fragment>}
+            </React.Fragment>
           </Toolbar>
-        </AppBar>
-        <div className={classes['appBarLoadingProgress.wrapper']}>
-          {isChecklistListDataLoading && (
-            <LinearProgress
-              classes={{
-                root: classes['appBarLoadingProgress.root'],
-              }}
-            />
-          )}
-        </div>
-
-        {isChecklistListDataReady && listOfChecklists && (
-          <List>
-            {listOfChecklists.map(({
-              _id,
-              name,
-              createDate,
-            }) => (
-              <ListItem
-                key={_id}
-                button
-                {...(isInEditMode && {
-                  onClick: () => this.onSelectItem(_id),
-                })}
-                {...(!isInEditMode && {
-                  component: Link,
-                  to: `/checklist/${_id}`,
-                })}
-              >
-                {isInEditMode && (
-                  <Checkbox
-                    className={classes.editModeSelectionCheckbox}
-                    checked={isItemSelectedInEditMode(_id)}
-                    tabIndex={-1}
-                    disableRipple
-                  />
-                )}
-
-                <ListItemText
-                  primary={name || voidChecklistName}
-                  secondary={moment.duration(moment(createDate).diff(dateNow)).humanize(true)}
-                />
-              </ListItem>
-            ))}
-          </List>
         )}
-
-        <FullScreenSpinner
-          open={isCreatingNewChecklist}
-        />
+      </AppBar>
+      <div className={classes['appBarLoadingProgress.wrapper']}>
+        {isChecklistListDataLoading && (
+          <LinearProgress
+            classes={{
+              root: classes['appBarLoadingProgress.root'],
+            }}
+          />
+        )}
       </div>
-    );
+    </React.Fragment>;
+  }
+
+  renderRedirects () {
+    const {
+      idOfNewlyCreatedChecklist,
+    } = this.props;
+
+    return <React.Fragment>
+      {idOfNewlyCreatedChecklist && (
+        <Redirect
+          push
+          to={`/checklist/${idOfNewlyCreatedChecklist}`}
+        />
+      )}
+    </React.Fragment>;
+  }
+
+  renderModals () {
+    const {
+      isCreatingNewChecklist,
+    } = this.props;
+
+    return <React.Fragment>
+      <FullScreenSpinner
+        open={isCreatingNewChecklist}
+      />
+    </React.Fragment>;
+  }
+
+  renderList () {
+    const {
+      classes,
+      isChecklistListDataReady,
+      listOfChecklists,
+      isInEditMode,
+
+      isItemSelectedInEditMode,
+    } = this.props;
+    const dateNow = Date.now();
+
+    return <React.Fragment>
+      {[
+        isChecklistListDataReady,
+        listOfChecklists,
+      ].every(Boolean) && (
+        <List>
+          {listOfChecklists.map(({
+            _id,
+            name,
+            createDate,
+          }) => (
+            <ListItem
+              key={_id}
+              button
+              {...(isInEditMode && {
+                onClick: () => this.onSelectItem(_id),
+              })}
+              {...(!isInEditMode && {
+                component: Link,
+                to: `/checklist/${_id}`,
+              })}
+            >
+              {isInEditMode && (
+                <Checkbox
+                  className={classes.editModeSelectionCheckbox}
+                  checked={isItemSelectedInEditMode(_id)}
+                  tabIndex={-1}
+                  disableRipple
+                />
+              )}
+
+              <ListItemText
+                primary={name || voidChecklistName}
+                secondary={moment.duration(moment(createDate).diff(dateNow)).humanize(true)}
+              />
+            </ListItem>
+          ))}
+        </List>
+      )}
+    </React.Fragment>;
+  }
+
+  render () {
+    return <React.Fragment>
+      {this.renderRedirects()}
+
+      {this.renderAppBar()}
+
+      {this.renderList()}
+
+      {this.renderModals()}
+    </React.Fragment>;
   }
 }
