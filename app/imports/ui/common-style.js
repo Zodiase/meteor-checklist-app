@@ -12,7 +12,7 @@ export
 const appBarBackButton = {
   'appBarBackButton.root': {
     marginLeft: -12,
-    marginRight: 20,
+    marginRight: 4,
   },
   'appBarBackButton.link': {
     color: 'inherit',
