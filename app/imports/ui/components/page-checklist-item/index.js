@@ -12,11 +12,6 @@ import {
 } from '/imports/ui/redux-store';
 
 import {
-  appBarLoadingProgress,
-  appBarBackButton,
-} from '/imports/ui/common-style';
-
-import {
   update as updateChecklist,
   addStep as addStepToChecklist,
 } from '/imports/api/checklists/methods';
@@ -24,7 +19,6 @@ import {
 import Component from './component';
 
 const styles = (theme) => ({
-  ...appBarLoadingProgress,
   appBarTitleButton: {
     textTransform: 'none',
     font: 'inherit',

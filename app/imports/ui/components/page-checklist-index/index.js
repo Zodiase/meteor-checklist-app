@@ -10,10 +10,6 @@ import {
 } from '/imports/ui/redux-store';
 
 import {
-  appBarLoadingProgress,
-} from '/imports/ui/common-style';
-
-import {
   createNew as createNewChecklist,
   remove as removeChecklists,
 } from '/imports/api/checklists/methods';
@@ -21,7 +17,6 @@ import {
 import Component from './component';
 
 const styles = (theme) => ({
-  ...appBarLoadingProgress,
   flex: {
     flex: 1,
   },

@@ -16,7 +16,6 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import List from '@material-ui/core/List';
@@ -34,6 +33,7 @@ import {
 } from '/imports/ui/consts';
 
 import AppBarBackButton from '/imports/ui/components/appbar-back-button';
+import AppBarLoadingProgress from '/imports/ui/components/appbar-loading-progress';
 
 import {
   ClientSideCreationSchema,
@@ -372,15 +372,9 @@ class ChecklistItemPage extends React.Component {
             </Typography>
           </Toolbar>
         </AppBar>
-        <div className={classes['appBarLoadingProgress.wrapper']}>
-          {isLoadingChecklistDocument && (
-            <LinearProgress
-              classes={{
-                root: classes['appBarLoadingProgress.root'],
-              }}
-            />
-          )}
-        </div>
+        <AppBarLoadingProgress
+          show={isLoadingChecklistDocument}
+        />
 
         <List>
           {isChecklistDocumentLoaded

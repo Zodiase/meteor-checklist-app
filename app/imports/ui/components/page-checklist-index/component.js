@@ -15,7 +15,6 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Checkbox from '@material-ui/core/Checkbox';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -30,6 +29,7 @@ import {
 } from '/imports/ui/consts';
 
 import AppBarBackButton from '/imports/ui/components/appbar-back-button';
+import AppBarLoadingProgress from '/imports/ui/components/appbar-loading-progress';
 import FullScreenSpinner from '/imports/ui/components/full-screen-spinner';
 
 export default
@@ -225,15 +225,9 @@ class ChecklistIndexPage extends React.Component {
           </Toolbar>
         )}
       </AppBar>
-      <div className={classes['appBarLoadingProgress.wrapper']}>
-        {isChecklistListDataLoading && (
-          <LinearProgress
-            classes={{
-              root: classes['appBarLoadingProgress.root'],
-            }}
-          />
-        )}
-      </div>
+      <AppBarLoadingProgress
+        show={isChecklistListDataLoading}
+      />
     </React.Fragment>;
   }
 
