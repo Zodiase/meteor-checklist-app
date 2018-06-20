@@ -25,7 +25,6 @@ import Component from './component';
 
 const styles = (theme) => ({
   ...appBarLoadingProgress,
-  ...appBarBackButton,
   appBarTitleButton: {
     textTransform: 'none',
     font: 'inherit',

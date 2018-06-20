@@ -25,8 +25,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Snackbar from '@material-ui/core/Snackbar';
-
-import BackIcon from '@material-ui/icons/KeyboardArrowLeft';
 import SaveIcon from '@material-ui/icons/CloudUpload';
 import CheckIcon from '@material-ui/icons/Check';
 import AddIcon from '@material-ui/icons/Add';
@@ -34,6 +32,8 @@ import AddIcon from '@material-ui/icons/Add';
 import {
   voidChecklistName,
 } from '/imports/ui/consts';
+
+import AppBarBackButton from '/imports/ui/components/appbar-back-button';
 
 import {
   ClientSideCreationSchema,
@@ -321,15 +321,10 @@ class ChecklistItemPage extends React.Component {
 
         <AppBar position="static">
           <Toolbar>
-            <IconButton
-              className={classes['appBarBackButton.root']}
-              color="inherit"
-              aria-label="Back"
+            <AppBarBackButton
               component={Link}
-              to="/"
-            >
-              <BackIcon />
-            </IconButton>
+              to="/checklist/index"
+            />
 
             <Typography variant="title" color="inherit" style={{flex: 1}}>
               {isChecklistDocumentLoaded && checklistDocument && !inTitleEditMode && (

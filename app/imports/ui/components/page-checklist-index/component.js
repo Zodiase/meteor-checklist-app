@@ -24,12 +24,12 @@ import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import SelectAllIcon from '@material-ui/icons/SelectAll';
 import DeleteIcon from '@material-ui/icons/Delete';
-import BackIcon from '@material-ui/icons/KeyboardArrowLeft';
 
 import {
   voidChecklistName,
 } from '/imports/ui/consts';
 
+import AppBarBackButton from '/imports/ui/components/appbar-back-button';
 import FullScreenSpinner from '/imports/ui/components/full-screen-spinner';
 
 export default
@@ -190,14 +190,9 @@ class ChecklistIndexPage extends React.Component {
 
         {isInEditMode && (
           <Toolbar key="toolbar-editmode">
-            <IconButton
-              className={classes['appBarBackButton.root']}
-              color="inherit"
-              aria-label="Back"
+            <AppBarBackButton
               onClick={this.onClickExitEditModeButton}
-            >
-              <BackIcon />
-            </IconButton>
+            />
 
             <Typography
               variant="subheading"

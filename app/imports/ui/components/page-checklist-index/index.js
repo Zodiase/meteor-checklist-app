@@ -11,7 +11,6 @@ import {
 
 import {
   appBarLoadingProgress,
-  appBarBackButton,
 } from '/imports/ui/common-style';
 
 import {
@@ -23,7 +22,6 @@ import Component from './component';
 
 const styles = (theme) => ({
   ...appBarLoadingProgress,
-  ...appBarBackButton,
   flex: {
     flex: 1,
   },
