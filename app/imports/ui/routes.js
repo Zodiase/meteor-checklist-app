@@ -5,7 +5,7 @@ import {
   matchPath,
 } from 'react-router-dom';
 import Head from '/imports/ui/components/head';
-import HomePage from '/imports/ui/components/page-main';
+import ChecklistIndexPage from '/imports/ui/components/page-checklist-index';
 import ChecklistPage from '/imports/ui/components/page-checklist';
 import {
   getAll as getAllChecklists,
@@ -21,7 +21,7 @@ const routeConfigs = [
     routeProps: {
       exact: true,
       path: '/',
-      component: HomePage,
+      component: ChecklistIndexPage,
     },
     initializingData: async (dispatch, props) => {
       const checklists = await getAllChecklists.callPromise();

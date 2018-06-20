@@ -131,12 +131,13 @@ class HomePage extends React.Component {
       isItemSelectedInEditMode,
     } = this.props;
 
+    const pageTitle = 'Checklists';
     const dateNow = Date.now();
 
     return (
       <div>
         <Helmet>
-          <title>Homepage</title>
+          <title>{pageTitle}</title>
         </Helmet>
 
         {idOfNewlyCreatedChecklist && (
@@ -149,7 +150,7 @@ class HomePage extends React.Component {
         <AppBar position="static">
           <Toolbar>
             <Typography variant="title" color="inherit" className={classes.flex}>
-              Checklists
+              {pageTitle}
             </Typography>
 
             {!isInEditMode && <React.Fragment>
