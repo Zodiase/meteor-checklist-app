@@ -18,12 +18,12 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import Badge from '@material-ui/core/Badge';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import SelectAllIcon from '@material-ui/icons/SelectAll';
 import DeleteIcon from '@material-ui/icons/Delete';
+import BackIcon from '@material-ui/icons/KeyboardArrowLeft';
 
 import {
   voidChecklistName,
@@ -148,7 +148,11 @@ class ChecklistIndexPage extends React.Component {
       >
         {!isInEditMode && (
           <Toolbar key="toolbar-default">
-            <Typography variant="title" color="inherit" className={classes.flex}>
+            <Typography
+              variant="title"
+              color="inherit"
+              className={classes.flex}
+            >
               {pageTitle}
             </Typography>
 
@@ -181,8 +185,21 @@ class ChecklistIndexPage extends React.Component {
 
         {isInEditMode && (
           <Toolbar key="toolbar-editmode">
-            <Typography variant="title" color="inherit" className={classes.flex}>
-              {pageTitle}
+            <IconButton
+              className={classes['appBarBackButton.root']}
+              color="inherit"
+              aria-label="Back"
+              onClick={this.onClickExitEditModeButton}
+            >
+              <BackIcon />
+            </IconButton>
+
+            <Typography
+              variant="subheading"
+              color="inherit"
+              className={classes.flex}
+            >
+              {listOfSelectedItemsInEditMode.length}
             </Typography>
 
             <React.Fragment>
@@ -196,20 +213,6 @@ class ChecklistIndexPage extends React.Component {
                 <DeleteIcon />
               </IconButton>
 
-              <Badge
-                classes={{
-                  root: classes['selectionCountBadge.root'],
-                  badge: classes['selectionCountBadge.badge'],
-                }}
-                color="secondary"
-                badgeContent={(
-                  <Typography
-                    variant="button"
-                    color="inherit"
-                  >{listOfSelectedItemsInEditMode.length}</Typography>
-                )}
-              > </Badge>
-
               <IconButton
                 classes={{
                   root: classes.appBarIconButton,
@@ -217,15 +220,6 @@ class ChecklistIndexPage extends React.Component {
                 onClick={this.onClickSelectAllItemsInEditModeButton}
               >
                 <SelectAllIcon />
-              </IconButton>
-
-              <IconButton
-                classes={{
-                  root: classes.appBarIconButton,
-                }}
-                onClick={this.onClickExitEditModeButton}
-              >
-                <CloseIcon />
               </IconButton>
             </React.Fragment>
           </Toolbar>
@@ -252,7 +246,7 @@ class ChecklistIndexPage extends React.Component {
       {idOfNewlyCreatedChecklist && (
         <Redirect
           push
-          to={`/checklist/${idOfNewlyCreatedChecklist}`}
+          to={`/checklist/item/${idOfNewlyCreatedChecklist}`}
         />
       )}
     </React.Fragment>;
@@ -300,7 +294,7 @@ class ChecklistIndexPage extends React.Component {
               })}
               {...(!isInEditMode && {
                 component: Link,
-                to: `/checklist/${_id}`,
+                to: `/checklist/item/${_id}`,
               })}
             >
               {isInEditMode && (

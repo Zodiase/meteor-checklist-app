@@ -11,6 +11,7 @@ import {
 
 import {
   appBarLoadingProgress,
+  appBarBackButton,
 } from '/imports/ui/common-style';
 
 import {
@@ -22,6 +23,7 @@ import Component from './component';
 
 const styles = (theme) => ({
   ...appBarLoadingProgress,
+  ...appBarBackButton,
   flex: {
     flex: 1,
   },
@@ -29,15 +31,6 @@ const styles = (theme) => ({
   editModeSelectionCheckbox: {
     width: 20,
     height: 20,
-  },
-  'selectionCountBadge.root': {
-  },
-  'selectionCountBadge.badge': {
-    backgroundColor: 'white',
-    color: 'black',
-    position: 'static',
-    top: false,
-    right: false,
   },
   appBarIconButton: {
     color: 'inherit',

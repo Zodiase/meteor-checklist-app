@@ -2,11 +2,12 @@ import React from 'react';
 import objectPath from 'object-path';
 import {
   Route,
+  Redirect,
   matchPath,
 } from 'react-router-dom';
 import Head from '/imports/ui/components/head';
 import ChecklistIndexPage from '/imports/ui/components/page-checklist-index';
-import ChecklistPage from '/imports/ui/components/page-checklist';
+import ChecklistItemPage from '/imports/ui/components/page-checklist-item';
 import {
   getAll as getAllChecklists,
   findById as findChecklistById,
@@ -21,6 +22,13 @@ const routeConfigs = [
     routeProps: {
       exact: true,
       path: '/',
+      component: () => <Redirect to="/checklist/index" />,
+    },
+  },
+  {
+    routeProps: {
+      exact: true,
+      path: '/checklist/index',
       component: ChecklistIndexPage,
     },
     initializingData: async (dispatch, props) => {
@@ -35,8 +43,8 @@ const routeConfigs = [
   {
     routeProps: {
       exact: true,
-      path: '/checklist/:id',
-      component: ChecklistPage,
+      path: '/checklist/item/:id',
+      component: ChecklistItemPage,
     },
     initializingData: async (dispatch, props) => {
       console.log(`Getting data for route ${objectPath.get(props, 'match.path')}`, objectPath.get(props, 'match.params'));
