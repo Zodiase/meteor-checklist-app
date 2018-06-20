@@ -19,10 +19,10 @@ Let’s start simple and say the app should first support me doing my morning an
 - [x] See a list of checklists
 - [ ] Modify a checklist
     - [x] Change the name of the checklist
-    - [ ] Add a step in the checklist
+    - [x] Add a step in the checklist
     - [ ] Modify a step in the checklist
     - [ ] Delete a step in the checklist
-- [ ] Delete a checklist 
+- [x] Delete a checklist 
 - [ ] Start a checklist
 - [ ] Complete a checklist
     - [ ] Mark a step as completed

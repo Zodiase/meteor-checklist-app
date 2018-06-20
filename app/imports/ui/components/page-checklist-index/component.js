@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import {
   Helmet,
 } from 'react-helmet';
-import moment from 'moment';
 import pluralize from 'pluralize';
 import {
   Redirect,
