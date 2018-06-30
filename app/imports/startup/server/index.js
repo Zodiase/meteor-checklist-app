@@ -57,23 +57,25 @@ import '/imports/api/checklists/publications';
 
 class App extends React.PureComponent {
   static propTypes = {
+    baseUrl: PropTypes.string.isRequired,
+    location: PropTypes.object.isRequired,
     jssRegistry: PropTypes.instanceOf(SheetsRegistry).isRequired,
     jssClassNameGenerator: PropTypes.func.isRequired,
     jssCache: PropTypes.instanceOf(Map).isRequired,
     theme: PropTypes.object.isRequired,
     reduxStore: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
     routerContext: PropTypes.object.isRequired,
   };
 
   render () {
     const {
+      baseUrl,
+      location,
       jssRegistry,
       jssClassNameGenerator,
       jssCache,
       theme,
       reduxStore,
-      location,
       routerContext,
     } = this.props;
 
@@ -89,6 +91,7 @@ class App extends React.PureComponent {
           <Provider store={reduxStore}>
             <StaticRouter
               location={location}
+              basename={baseUrl}
               context={routerContext}
             >
               {routes}
@@ -100,9 +103,13 @@ class App extends React.PureComponent {
   }
 }
 
+const baseUrl = objectPath.get(Meteor.settings, 'public.baseUrl', '/');
+
 onPageLoad(async (sink) => {
   const clientLocation = sink.request.url;
-  const history = createHistory();
+  const history = createHistory({
+    basename: baseUrl,
+  });
   history.push(clientLocation.href);
 
   const finalReducer = connectRouter(history)(rootReducer);
@@ -120,6 +127,7 @@ onPageLoad(async (sink) => {
 
   const initialHtml = renderToString((
     <App
+      baseUrl={baseUrl}
       location={clientLocation}
       jssRegistry={sheetsRegistry}
       jssClassNameGenerator={generateClassName}

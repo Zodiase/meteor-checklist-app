@@ -79,8 +79,12 @@ class App extends React.PureComponent {
   }
 }
 
+const baseUrl = objectPath.get(Meteor.settings, 'public.baseUrl', '/');
+
 onPageLoad(() => {
-  const history = createHistory();
+  const history = createHistory({
+    basename: baseUrl,
+  });
   const finalReducer = connectRouter(history)(rootReducer);
   const globalStateStore = createStore(
     finalReducer,
