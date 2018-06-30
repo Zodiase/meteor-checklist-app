@@ -1,7 +1,9 @@
 import React from 'react';
 import objectPath from 'object-path';
 import {
+  Switch,
   Route,
+  Link,
   Redirect,
   matchPath,
 } from 'react-router-dom';
@@ -13,12 +15,12 @@ import {
   findById as findChecklistById,
 } from '/imports/api/checklists/methods';
 import {
-  store as globalStateStore,
   getAction,
 } from '/imports/ui/redux-store';
 
-const routeConfigs = [
+const switchRouteConfigs = [
   {
+    name: 'home-page',
     routeProps: {
       exact: true,
       path: '/',
@@ -26,12 +28,13 @@ const routeConfigs = [
     },
   },
   {
+    name: 'checklist-index-page',
     routeProps: {
       exact: true,
       path: '/checklist/index',
       component: ChecklistIndexPage,
     },
-    initializingData: async (dispatch, props) => {
+    initializingData: async (dispatch/* , props */) => {
       const checklists = await getAllChecklists.callPromise();
 
       dispatch({
@@ -41,6 +44,7 @@ const routeConfigs = [
     },
   },
   {
+    name: 'checklist-item-page',
     routeProps: {
       exact: true,
       path: '/checklist/item/:id',
@@ -78,7 +82,7 @@ const routeConfigs = [
 export
 const initializingReduxStoreForRouteSsr = async (store, location) => {
   const routePath = location.pathname;
-  const matchedRoute = routeConfigs.find((config) => matchPath(routePath, config.routeProps));
+  const matchedRoute = switchRouteConfigs.find((config) => matchPath(routePath, config.routeProps));
 
   if (!matchedRoute || !matchedRoute.initializingData) {
     return;
@@ -86,7 +90,7 @@ const initializingReduxStoreForRouteSsr = async (store, location) => {
 
   const match = matchPath(routePath, matchedRoute.routeProps);
 
-  return await matchedRoute.initializingData(store.dispatch, {
+  await matchedRoute.initializingData(store.dispatch, {
     match,
   });
 };
@@ -94,8 +98,15 @@ const initializingReduxStoreForRouteSsr = async (store, location) => {
 export default (
   <React.Fragment>
     <Head />
-    {routeConfigs.map(({routeProps}) => (
-      <Route key={routeProps.path} {...routeProps} />
-    ))}
+    <Switch>
+      {switchRouteConfigs.map(({
+        name,
+        routeProps,
+      }) => {
+        return (
+          <Route key={name} {...routeProps} />
+        );
+      })}
+    </Switch>
   </React.Fragment>
 );
