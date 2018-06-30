@@ -8,7 +8,9 @@ import {
   SheetsRegistry,
 } from 'react-jss';
 import {
-  ConnectedRouter,
+  StaticRouter,
+} from 'react-router';
+import {
   connectRouter,
   routerMiddleware,
 } from 'connected-react-router';
@@ -45,6 +47,8 @@ onPageLoad(async (sink) => {
   });
   history.push(clientLocation.href);
 
+  console.group(`Page visit: ${clientLocation.href}`);
+
   const finalReducer = connectRouter(history)(rootReducer);
   const globalStateStore = createStore(finalReducer, {
     middlewares: [
@@ -68,9 +72,11 @@ onPageLoad(async (sink) => {
       >
         <App
           reduxStore={globalStateStore}
-          RouterComponent={ConnectedRouter}
+          RouterComponent={StaticRouter}
           routerProps={{
-            history,
+            basename: baseUrl,
+            location: clientLocation,
+            context: {},
           }}
         />
       </MuiThemeProvider>
@@ -80,7 +86,7 @@ onPageLoad(async (sink) => {
   const preloadedState = globalStateStore.getState();
   const helmet = Helmet.renderStatic();
 
-  console.log('Sending initial state', preloadedState);
+  console.log('Preloaded State', preloadedState);
 
   sink.renderIntoElementById('app', initialHtml);
   sink.appendToHead(`\n${helmet.meta.toString()}\n`);
@@ -92,4 +98,6 @@ onPageLoad(async (sink) => {
       window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState).replace(/</g, '\\u003c')}
     </script>
   `);
+
+  console.groupEnd();
 });
