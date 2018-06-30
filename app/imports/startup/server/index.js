@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   renderToString,
 } from 'react-dom/server';
@@ -17,7 +18,6 @@ import {
   connectRouter,
   routerMiddleware,
 } from 'connected-react-router';
-import PropTypes from 'prop-types';
 import {
   Helmet,
 } from 'react-helmet';
@@ -55,6 +55,51 @@ import '/imports/api/checklists/publications';
   }).install();
 })(objectPath.get(Meteor.settings, 'sentry.dsn'));
 
+class App extends React.PureComponent {
+  static propTypes = {
+    jssRegistry: PropTypes.instanceOf(SheetsRegistry).isRequired,
+    jssClassNameGenerator: PropTypes.func.isRequired,
+    jssCache: PropTypes.instanceOf(Map).isRequired,
+    theme: PropTypes.object.isRequired,
+    reduxStore: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+    routerContext: PropTypes.object.isRequired,
+  };
+
+  render () {
+    const {
+      jssRegistry,
+      jssClassNameGenerator,
+      jssCache,
+      theme,
+      reduxStore,
+      location,
+      routerContext,
+    } = this.props;
+
+    return (
+      <JssProvider
+        registry={jssRegistry}
+        generateClassName={jssClassNameGenerator}
+      >
+        <MuiThemeProvider
+          theme={theme}
+          sheetsManager={jssCache}
+        >
+          <Provider store={reduxStore}>
+            <StaticRouter
+              location={location}
+              context={routerContext}
+            >
+              {routes}
+            </StaticRouter>
+          </Provider>
+        </MuiThemeProvider>
+      </JssProvider>
+    );
+  }
+}
+
 onPageLoad(async (sink) => {
   const clientLocation = sink.request.url;
   const history = createHistory();
@@ -70,27 +115,6 @@ onPageLoad(async (sink) => {
   const generateClassName = createGenerateClassName();
   const context = {};
   const theme = createMuiTheme({});
-
-  const App = (props) => (
-    <JssProvider
-      registry={props.jssRegistry}
-      generateClassName={props.jssClassNameGenerator}
-    >
-      <MuiThemeProvider
-        theme={props.theme}
-        sheetsManager={props.jssCache}
-      >
-        <Provider store={props.reduxStore}>
-          <StaticRouter
-            location={props.location}
-            context={props.routerContext}
-          >
-            {routes}
-          </StaticRouter>
-        </Provider>
-      </MuiThemeProvider>
-    </JssProvider>
-  );
 
   await initializingReduxStoreForRouteSsr(globalStateStore, clientLocation);
 

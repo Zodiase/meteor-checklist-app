@@ -15,6 +15,10 @@
             "error",
             "always"
         ],
+        "function-paren-newline": [
+            "error",
+            "multiline"
+        ],
         "max-len": "warn",
         "no-nested-ternary": "warn",
         "no-param-reassign": [
@@ -26,6 +30,18 @@
         "no-return-assign": "off",
         "no-underscore-dangle": "off",
         "no-unused-expressions": "off",
+        "object-curly-newline": [
+            "error",
+            {
+                "ObjectExpression": {
+                    "multiline": true,
+                    "minProperties": 1
+                },
+                "ObjectPattern": "always",
+                "ImportDeclaration": "always",
+                "ExportDeclaration": "always"
+            }
+        ],
         "linebreak-style": "off"
     }
 }

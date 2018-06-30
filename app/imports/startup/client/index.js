@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import {
   Switch,
@@ -23,7 +24,6 @@ import {
 import {
   MuiThemeProvider,
   createMuiTheme,
-  createGenerateClassName,
 } from '@material-ui/core/styles';
 
 import routes from '/imports/ui/routes';
@@ -43,7 +43,13 @@ import {
   }).install();
 })(objectPath.get(Meteor.settings.public, 'sentry.dsn'));
 
-class App extends React.Component {
+class App extends React.PureComponent {
+  static propTypes = {
+    theme: PropTypes.object.isRequired,
+    store: PropTypes.object.isRequired,
+    history: PropTypes.object.isRequired,
+  };
+
   componentDidMount () {
     // Remove server-side rendered JSS styles.
     const jssStyles = document.querySelector('style[data-jss-ssr]');
@@ -53,10 +59,16 @@ class App extends React.Component {
   }
 
   render () {
+    const {
+      theme,
+      store,
+      history,
+    } = this.props;
+
     return (
-      <MuiThemeProvider theme={this.props.theme}>
-        <Provider store={this.props.store}>
-          <ConnectedRouter history={this.props.history}>
+      <MuiThemeProvider theme={theme}>
+        <Provider store={store}>
+          <ConnectedRouter history={history}>
             <Switch>
               {routes}
             </Switch>
@@ -70,19 +82,23 @@ class App extends React.Component {
 onPageLoad(() => {
   const history = createHistory();
   const finalReducer = connectRouter(history)(rootReducer);
-  const globalStateStore = createStore(finalReducer, {
-    middlewares: [
-      routerMiddleware(history),
-    ],
-  });
+  const globalStateStore = createStore(
+    finalReducer,
+    {
+      middlewares: [
+        routerMiddleware(history),
+      ],
+    },
+  );
   const theme = createMuiTheme({});
 
   setGlobalStore(globalStateStore);
-  ReactDOM.hydrate((
+  ReactDOM.hydrate(
     <App
       store={globalStateStore}
       theme={theme}
       history={history}
-    />
-  ), document.getElementById('app'));
+    />,
+    document.getElementById('app'),
+  );
 });
