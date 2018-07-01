@@ -34,6 +34,13 @@ const StoredSchema = new SimpleSchema({
     defaultValue: [],
   },
   'steps.$': StepSchema,
+});
+
+export
+// Schema of data fetched from database, which includes auto-generated fields.
+const FetchedSchema = new SimpleSchema({
+  ...StoredSchema.schema(),
+
   stepCount: {
     type: Number,
     optional: true,
@@ -63,16 +70,16 @@ const ClientSideCreationSchema = StoredSchema.pick(
 export
 // Schema of the checklist when displayed in an index (no detail).
 const IndexSchema = StoredSchema.omit('steps')
-.extend({
-  stepCount: {
-    type: Number,
-    autoValue: null,
-  },
-});
+  .extend({
+    stepCount: {
+      type: Number,
+      autoValue: null,
+    },
+  });
 
 export
 const transformForIndex = (doc) => {
-  const fullDoc = StoredSchema.clean(doc);
+  const fullDoc = FetchedSchema.clean(doc);
   const cleanedDoc = IndexSchema.clean(fullDoc);
 
   return cleanedDoc;
