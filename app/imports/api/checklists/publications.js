@@ -1,6 +1,4 @@
-import {
-  createPublication,
-} from '/imports/helpers.server';
+import createPublication from '../create-publication';
 import Checklists from './collections';
 import {
   transformForIndex,

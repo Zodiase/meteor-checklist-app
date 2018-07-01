@@ -1,3 +1,5 @@
+/* eslint no-console: off */
+
 import SimpleSchema from 'simpl-schema';
 import {
   ValidatedMethod,
@@ -12,8 +14,7 @@ import {
   endCallMark,
 } from '/imports/consts.shared';
 
-export default
-({
+const createMethod = ({
   name,
   schema,
   method,
@@ -53,3 +54,5 @@ export default
     run,
   });
 };
+
+export default createMethod;

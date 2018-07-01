@@ -1,12 +1,13 @@
+/* eslint no-console: off */
+
 import {
   Meteor,
 } from 'meteor/meteor';
 
 import {
   publicationMark,
-} from './consts.server';
+} from '/imports/consts.server';
 
-export
 const createPublication = (pubName, pubFunc) => {
   /**
    * This helper function does a few things:
@@ -33,3 +34,5 @@ const createPublication = (pubName, pubFunc) => {
 
   console.log(publicationMark, pubName, 'created');
 };
+
+export default createPublication;
