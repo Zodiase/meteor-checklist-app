@@ -14,16 +14,4 @@ Let’s start simple and say the app should first support me doing my morning an
 
 ## MVP Feature List
 
-- [x] Create a new checklist
-    - [x] Specify a name for the checklist
-- [x] See a list of checklists
-- [ ] Modify a checklist
-    - [x] Change the name of the checklist
-    - [x] Add a step in the checklist
-    - [ ] Modify a step in the checklist
-    - [ ] Delete a step in the checklist
-- [x] Delete a checklist 
-- [ ] Start a checklist
-- [ ] Complete a checklist
-    - [ ] Mark a step as completed
-- [ ] Abort a checklist
+See the list at https://github.com/Zodiase/meteor-checklist-app/milestone/1
