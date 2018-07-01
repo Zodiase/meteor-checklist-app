@@ -78,8 +78,15 @@ const IndexSchema = StoredSchema.omit('steps')
   });
 
 export
-const transformForIndex = (doc) => {
+const transformToFull = (doc) => {
   const fullDoc = FetchedSchema.clean(doc);
+
+  return fullDoc;
+};
+
+export
+const transformForIndex = (doc) => {
+  const fullDoc = transformToFull(doc);
   const cleanedDoc = IndexSchema.clean(fullDoc);
 
   return cleanedDoc;

@@ -1,6 +1,10 @@
 import objectPath from 'object-path';
-import { Meteor } from 'meteor/meteor';
-import { Tracker } from 'meteor/tracker';
+import {
+  Meteor,
+} from 'meteor/meteor';
+import {
+  Tracker,
+} from 'meteor/tracker';
 
 import handleStorage from '/imports/handle-storage';
 import {
@@ -13,9 +17,13 @@ import {
   createNew as createNewChecklist,
 } from '/imports/api/checklists/methods';
 import {
-  StepSchema,
   ClientSideCreationSchema,
+  transformForIndex,
+  transformToFull,
 } from '/imports/api/checklists/schema';
+import {
+  sortByCreateDate,
+} from '/imports/api/checklists/consts';
 
 const wrapJsonFriendlyChecklistDocument = (originalDoc) => {
   if (!originalDoc) {
@@ -38,16 +46,20 @@ registerAction({
   reducer: (state, {
     onListUpdate,
   }) => {
-    const handleOfSubscription = Meteor.subscribe(
-      'checklists.index',
-    );
+    const handleOfSubscription = Meteor.subscribe('checklists.index');
     const handleIdOfSubscription = handleStorage.deposit(handleOfSubscription);
     const handleOfTracker = Tracker.autorun(() => {
       console.group(`Autorun for subscription ${handleIdOfSubscription}`);
 
-      const checklistDocsCursor = Checklists.find({}, {
-        sort: { createDate: -1 },
-      });
+      const checklistDocsCursor = Checklists.find(
+        {},
+        {
+          sort: [
+            sortByCreateDate,
+          ],
+          transform: transformForIndex,
+        },
+      );
 
       if (handleOfSubscription.ready() && checklistDocsCursor) {
         const checklistDocs = checklistDocsCursor.fetch();
@@ -128,7 +140,7 @@ registerAction({
     onError,
   }) => {
     createNewChecklist.callPromise(checklist)
-    .then(onReady, onError);
+      .then(onReady, onError);
 
     return state;
   },
@@ -173,13 +185,18 @@ registerAction({
             // Subscription is stopped normally.
           }
         },
-      }
+      },
     );
     const handleIdOfSubscription = handleStorage.deposit(handleOfSubscription);
     const handleOfTracker = Tracker.autorun(() => {
-      const checklistDocsCursor = Checklists.find({
-        _id: idOfChecklist,
-      });
+      const checklistDocsCursor = Checklists.find(
+        {
+          _id: idOfChecklist,
+        },
+        {
+          transform: transformToFull,
+        },
+      );
 
       if (handleOfSubscription.ready() && checklistDocsCursor) {
         const checklistDoc = checklistDocsCursor.fetch()[0];
@@ -198,8 +215,8 @@ registerAction({
         id: idOfChecklist,
         loading: true,
         subscribed: true,
-        handleIdOfSubscription: handleIdOfSubscription,
-        handleIdOfTracker: handleIdOfTracker,
+        handleIdOfSubscription,
+        handleIdOfTracker,
       },
     };
   },
@@ -222,8 +239,6 @@ registerAction({
     if (!documentInfo) {
       return scopedState;
     }
-
-    const nextDocumentInfo = {...documentInfo};
 
     if (documentInfo.handleIdOfSubscription) {
       const handleOfSubscription = handleStorage.withdraw(documentInfo.handleIdOfSubscription);
@@ -484,9 +499,7 @@ registerAction({
 
 registerAction({
   type: 'ui.checklist.startWaitingConfirmationOfNewStep',
-  reducer: (state, {
-    idOfChecklist,
-  }) => {
+  reducer: (state) => {
     return {
       ...state,
 
@@ -518,7 +531,6 @@ registerAction({
     error,
     response,
   }) => {
-
     if (error) {
       const uiError = {
         name: 'unknown',

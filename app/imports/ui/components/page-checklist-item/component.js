@@ -58,6 +58,7 @@ class ChecklistItemPage extends React.Component {
     isChecklistDocumentLoaded: PropTypes.bool.isRequired,
     checklistDocument: PropTypes.shape({
       name: PropTypes.string.isRequired,
+      steps: PropTypes.array.isRequired,
     }),
     isNewlyCreatedChecklist: PropTypes.bool.isRequired,
     isWaitingConfirmationOfNewStep: PropTypes.bool.isRequired,
