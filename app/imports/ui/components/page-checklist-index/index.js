@@ -3,7 +3,9 @@ import {
   connect,
 } from 'react-redux';
 import objectPath from 'object-path';
-import { withStyles } from '@material-ui/core/styles';
+import {
+  withStyles,
+} from '@material-ui/core/styles';
 
 import {
   getAction,
@@ -16,7 +18,7 @@ import {
 
 import Component from './component';
 
-const styles = (theme) => ({
+const styles = (/* theme */) => ({
   flex: {
     flex: 1,
   },
@@ -34,14 +36,14 @@ const styles = (theme) => ({
 
 export default connect(
   // mapStateToProps
-  (state, ownProps) => {
+  (state/* , ownProps */) => {
     const isChecklistListDataLoading = objectPath.get(state, ['data.checklists.loading'], true);
     const isChecklistListDataReady = objectPath.get(state, ['data.checklists.ready'], false);
     const listOfChecklists = objectPath.get(state, ['data.checklists.items'], null);
     const isInEditMode = objectPath.get(state, ['ui.checklist.list.inEditMode'], false);
     const isCreatingNewChecklist = objectPath.get(state, ['ui.checklist.creatingNewChecklist'], false);
     const idOfNewlyCreatedChecklist = objectPath.get(state, ['ui.checklist.idOfNewlyCreatedChecklist']);
-    const selectionInEditMode = isInEditMode && objectPath.get(state, ['ui.checklist.list.editMode.selection'], {}) || {};
+    const selectionInEditMode = isInEditMode ? objectPath.get(state, ['ui.checklist.list.editMode.selection'], {}) : {};
     const isItemSelectedInEditMode = (itemId) => {
       const isItemSelected = objectPath.get(selectionInEditMode, [itemId], false);
 
@@ -52,14 +54,14 @@ export default connect(
       listOfChecklists,
       isInEditMode,
     ].every(Boolean)
-    && (
-      listOfChecklists.filter((doc) => isItemSelectedInEditMode(doc._id))
-      .map((doc) => doc._id)
-    )
-    || [];
+      ? (
+        listOfChecklists.filter((doc) => isItemSelectedInEditMode(doc._id))
+          .map((doc) => doc._id)
+      )
+      : [];
 
     return {
-      isChecklistListDataLoading, 
+      isChecklistListDataLoading,
       isChecklistListDataReady,
       listOfChecklists,
       isInEditMode,
@@ -71,7 +73,7 @@ export default connect(
     };
   },
   // mapDispatchToProps
-  (dispatch, ownProps) => ({
+  (dispatch/* , ownProps */) => ({
     enterEditMode: () => {
       dispatch({
         type: getAction('ui.checklist.listEditMode.enter').type,
