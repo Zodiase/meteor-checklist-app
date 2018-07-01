@@ -29,9 +29,35 @@ const createPublication = (pubName, pubFunc) => {
       console.log(publicationMark, pubName, ...logArgs);
     };
 
-    context.log('subscribed');
+    // Wrap each function to add logs.
+    [
+      'added',
+      'changed',
+      'removed',
+      'ready',
+    ].forEach((key) => {
+      context[key] = ((reactFunc) => (...changeArgs) => {
+        context.log(key, JSON.stringify(changeArgs, null, 2));
 
-    return pubFunc(context, ...subArgs);
+        return reactFunc(...changeArgs);
+      })(context[key].bind(context));
+    });
+
+    context.onStop(() => {
+      context.log('stopped');
+    });
+
+    console.group(publicationMark, pubName, 'subscribed', JSON.stringify({
+      userId: context.userId,
+      subArgs,
+    }, null, 2));
+
+    // `pubFunc` would call `context.log`.
+    const pubResult = pubFunc(context, ...subArgs);
+
+    console.groupEnd();
+
+    return pubResult;
   };
 
   // Assign a name to the function to aid debugging.
