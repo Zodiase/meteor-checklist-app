@@ -5,16 +5,16 @@ import Checklists from './collections';
 import {
   transformForIndex,
 } from './schema';
+import {
+  sortByCreateDate,
+} from './consts';
 
 createPublication('checklists.index', (pub) => {
-  const selector = {};
-  const sort = {
-    createDate: -1,
-  };
-  const fields = {};
-  const cursor = Checklists.find(selector, {
-    sort,
-    fields,
+  const cursor = Checklists.find({}, {
+    sort: [
+      sortByCreateDate,
+    ],
+    fields: {},
   });
   const observer = cursor.observe({
     added (document) {
@@ -41,8 +41,8 @@ createPublication('checklist.full', (pub, {
   return Checklists.find({
     _id: idOfChecklist,
   }, {
-    sort: {
-      createDate: -1,
-    },
+    sort: [
+      sortByCreateDate,
+    ],
   });
 });

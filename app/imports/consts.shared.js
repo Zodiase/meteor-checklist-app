@@ -12,3 +12,12 @@ const pageSsrMark = '📄 ';
 
 export
 const publicationMark = '📃 ';
+
+export
+const callMark = '🤙 ';
+
+export
+const respondMark = '🖖 ';
+
+export
+const endCallMark = '🤘 ';

@@ -42,6 +42,10 @@
                 "ExportDeclaration": "always"
             }
         ],
+        "space-before-function-paren": [
+            "error",
+            "always"
+        ],
         "linebreak-style": "off"
     }
 }

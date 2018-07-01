@@ -6,6 +6,3 @@ const baseName = 'checklists';
 const collection = new Mongo.Collection(baseName);
 
 export default collection;
-
-export
-const selectors = {};

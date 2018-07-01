@@ -1,5 +1,3 @@
-import SimpleSchema from 'simpl-schema';
-
 import createMethod from '../create-method';
 
 import Checklists from './';
@@ -8,11 +6,14 @@ import {
   ClientSideCreationSchema,
   transformForIndex,
 } from './schema';
+import {
+  sortByCreateDate,
+} from './consts';
 
 export
 const count = createMethod({
   name: 'checklists.methods.count',
-  method: () => {
+  method () {
     return Checklists.find().count();
   },
 });
@@ -20,23 +21,33 @@ const count = createMethod({
 export
 const getAll = createMethod({
   name: 'checklists.methods.getAll',
-  method: () => {
-    return Checklists.find({}, {
-      sort: { createDate: -1 },
-    }).fetch();
+  method () {
+    return Checklists.find(
+      {},
+      {
+        sort: [
+          sortByCreateDate,
+        ],
+      },
+    ).fetch();
   },
 });
 
 export
 const getAllForIndex = createMethod({
   name: 'checklists.methods.getAllForIndex',
-  method: () => {
-    return Checklists.find({}, {
-      sort: {
-        createDate: -1,
+  method () {
+    const docs = Checklists.find(
+      {},
+      {
+        sort: [
+          sortByCreateDate,
+        ],
+        transform: transformForIndex,
       },
-      transform: transformForIndex,
-    }).fetch();
+    ).fetch();
+
+    return docs;
   },
 });
 
@@ -46,10 +57,14 @@ const findById = createMethod({
   schema: {
     id: String,
   },
-  method: ({ id }) => {
-    return Checklists.findOne({
+  method ({
+    id,
+  }) {
+    const doc = Checklists.findOne({
       _id: id,
     });
+
+    return doc;
   },
 });
 
@@ -58,20 +73,18 @@ const createNew = createMethod({
   name: 'checklists.methods.createNew',
   schema: ClientSideCreationSchema,
   method (checklist) {
-    console.log('checklists.methods.createNew', checklist);
-
     const date = new Date();
-    const fullDocument = {
+    const fullDocumentToInsert = {
       ...checklist,
 
       createDate: date,
       modifyDate: date,
     };
 
-    const docId = Checklists.insert(fullDocument);
+    const idOfInsertedDocument = Checklists.insert(fullDocumentToInsert);
 
     return {
-      _id: docId,
+      _id: idOfInsertedDocument,
     };
   },
 });
@@ -83,16 +96,20 @@ const update = createMethod({
     id: String,
     changes: ClientSideCreationSchema,
   },
-  method: ({ id, changes }) => {
-    console.log('checklists.methods.update', id, changes);
-
-    const updateCount = Checklists.update({
-      _id: id,
-    }, {
-      $set: {
-        ...changes,
+  method ({
+    id,
+    changes,
+  }) {
+    const updateCount = Checklists.update(
+      {
+        _id: id,
       },
-    });
+      {
+        $set: {
+          ...changes,
+        },
+      },
+    );
 
     return {
       success: updateCount > 0,
@@ -106,9 +123,9 @@ const remove = createMethod({
   schema: {
     ids: [String],
   },
-  method: ({ ids }) => {
-    console.log('checklists.methods.remove', ids);
-
+  method ({
+    ids,
+  }) {
     const deleteCount = Checklists.remove({
       _id: {
         $in: ids,
@@ -128,19 +145,20 @@ const addStep = createMethod({
     idOfChecklist: String,
     step: StepSchema,
   },
-  method: ({
+  method ({
     idOfChecklist,
     step,
-  }) => {
-    console.log('checklists.methods.addStep', idOfChecklist, step);
-
-    const updateCount = Checklists.update({
-      _id: idOfChecklist,
-    }, {
-      $push: {
-        steps: step,
+  }) {
+    const updateCount = Checklists.update(
+      {
+        _id: idOfChecklist,
       },
-    });
+      {
+        $push: {
+          steps: step,
+        },
+      },
+    );
 
     return {
       success: updateCount > 0,
