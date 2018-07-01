@@ -28,6 +28,7 @@ import {
 
 import {
   baseUrl,
+  pageSsrMark,
 } from '/imports/consts.server';
 import App from '/imports/ui/App';
 import {
@@ -47,7 +48,7 @@ onPageLoad(async (sink) => {
   });
   history.push(clientLocation.href);
 
-  console.group(`Page visit: ${clientLocation.href}`);
+  console.group(`${pageSsrMark} Page visit: ${clientLocation.href}`);
 
   const finalReducer = connectRouter(history)(rootReducer);
   const globalStateStore = createStore(finalReducer, {

@@ -1,5 +1,6 @@
-import { Meteor } from 'meteor/meteor';
-
+import {
+  createPublication,
+} from '/imports/helpers.server';
 import Checklists, {
   countCollection as ChecklistCount,
   selectors,
@@ -9,9 +10,7 @@ import {
 } from './schema';
 
 // Publish the current size of the collection.
-Meteor.publish('checklists.count', function () {
-  console.log('Publication `checklists.count` subscribed.');
-
+createPublication('checklists.count', (pub) => {
   const collectionName = ChecklistCount._name;
   const docId = 'count';
   let count = 0;
@@ -21,35 +20,39 @@ Meteor.publish('checklists.count', function () {
   // Until then, we don't want to send a lot of `changed` messages—hence
   // tracking the `initializing` state.
   const handle = Checklists.find(selectors.initialized).observeChanges({
-    added: () => {
+    added() {
       count += 1;
 
       if (initializing) {
         return;
       }
 
-      console.log(collectionName, 'added', count);
+      pub.log(collectionName, 'added', count);
 
-      this.changed(collectionName, docId, { value: count });
+      pub.changed(collectionName, docId, {
+        value: count,
+      });
     },
-    removed: () => {
+    removed() {
       count -= 1;
 
-      console.log(collectionName, 'removed', count);
+      pub.log(collectionName, 'removed', count);
 
-      this.changed(collectionName, docId, { value: count });
+      pub.changed(collectionName, docId, {
+        value: count,
+      });
     },
   });
 
   initializing = false;
-  this.added(collectionName, docId, { value: count });
-  this.ready();
-  this.onStop(() => handle.stop());
+  pub.added(collectionName, docId, {
+    value: count,
+  });
+  pub.ready();
+  pub.onStop(() => handle.stop());
 });
 
-Meteor.publish('checklists.all', () => {
-  console.log('Publication `checklists.all` subscribed.');
-
+createPublication('checklists.all', (/* pub */) => {
   return Checklists.find({}, {
     sort: {
       createDate: -1,
@@ -57,43 +60,43 @@ Meteor.publish('checklists.all', () => {
   });
 });
 
-Meteor.publish('checklists.index', function () {
-  console.log('Publication `checklists.index` subscribed.');
-
-  const publication = this;
+createPublication('checklists.index', (pub) => {
   const selector = {};
   const sort = {
     createDate: -1,
   };
   const fields = {};
-  const cursor = Checklists.find(selector, { sort, fields });
+  const cursor = Checklists.find(selector, {
+    sort,
+    fields,
+  });
   const observer = cursor.observe({
-    added: (document) => {
-      publication.added(Checklists._name, document._id, transformForIndex(document));
+    added(document) {
+      pub.added(Checklists._name, document._id, transformForIndex(document));
     },
-    changed: function (newDocument, oldDocument) {
-      publication.changed(Checklists._name, oldDocument._id, transformForIndex(newDocument));
+    changed(newDocument, oldDocument) {
+      pub.changed(Checklists._name, oldDocument._id, transformForIndex(newDocument));
     },
-    removed: function (oldDocument) {
-      publication.removed(Checklists._name, oldDocument._id);
-    }
+    removed(oldDocument) {
+      pub.removed(Checklists._name, oldDocument._id);
+    },
   });
 
-  publication.onStop(function () {
+  pub.onStop(function () {
     observer.stop();
   });
 
-  publication.ready();
+  pub.ready();
 });
 
-Meteor.publish('checklist.full', ({
-  idOfchecklist,
+createPublication('checklist.full', (pub, {
+  idOfChecklist,
 }) => {
-  console.log('Publication `checklist.full` subscribed.');
-
   return Checklists.find({
-    _id: idOfchecklist,
+    _id: idOfChecklist,
   }, {
-    sort: { createDate: -1 },
+    sort: {
+      createDate: -1,
+    },
   });
 });

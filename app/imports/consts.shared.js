@@ -6,3 +6,9 @@ import {
 export
 // Must not have a leading '/'.
 const baseUrl = objectPath.get(Meteor.settings.public, 'baseUrl', '');
+
+export
+const pageSsrMark = '📄 ';
+
+export
+const publicationMark = '📃 ';
