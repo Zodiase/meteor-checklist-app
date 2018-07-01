@@ -51,8 +51,6 @@ const switchRouteConfigs = [
       component: ChecklistItemPage,
     },
     initializingData: async (dispatch, props) => {
-      console.log(`Getting data for route ${objectPath.get(props, 'match.path')}`, objectPath.get(props, 'match.params'));
-
       const idOfChecklist = objectPath.get(props, 'match.params.id');
 
       const checklist = idOfChecklist && await findChecklistById.callPromise({
@@ -77,6 +75,12 @@ const switchRouteConfigs = [
       });
     },
   },
+  {
+    name: '404-page',
+    routeProps: {
+      component: () => <Link to="/">404</Link>,
+    },
+  },
 ];
 
 export
@@ -90,9 +94,13 @@ const initializingReduxStoreForRouteSsr = async (store, location) => {
 
   const match = matchPath(routePath, matchedRoute.routeProps);
 
+  console.group(`Getting data for route '${match.path}'`, match.params);
+
   await matchedRoute.initializingData(store.dispatch, {
     match,
   });
+
+  console.groupEnd();
 };
 
 export default (
