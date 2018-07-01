@@ -137,17 +137,17 @@ registerAction({
 registerAction({
   type: 'data.checklists.document.subscribe',
   schema: {
-    idOfchecklist: String,
+    idOfChecklist: String,
     onDocumentUpdate: Function,
   },
   scopePath: [
     'data.checklists.documents',
   ],
   reducer: (scopedState, {
-    idOfchecklist,
+    idOfChecklist,
     onDocumentUpdate,
   }) => {
-    const documentInfo = scopedState[idOfchecklist];
+    const documentInfo = scopedState[idOfChecklist];
 
     if (documentInfo) {
       const isDocumentLoaded = objectPath.get(documentInfo, 'ready', false);
@@ -163,7 +163,7 @@ registerAction({
     const handleOfSubscription = Meteor.subscribe(
       'checklist.full',
       {
-        idOfchecklist,
+        idOfChecklist,
       },
       {
         onStop: (error) => {
@@ -178,7 +178,7 @@ registerAction({
     const handleIdOfSubscription = handleStorage.deposit(handleOfSubscription);
     const handleOfTracker = Tracker.autorun(() => {
       const checklistDocsCursor = Checklists.find({
-        _id: idOfchecklist,
+        _id: idOfChecklist,
       });
 
       if (handleOfSubscription.ready() && checklistDocsCursor) {
@@ -192,10 +192,10 @@ registerAction({
     return {
       ...scopedState,
 
-      [idOfchecklist]: {
+      [idOfChecklist]: {
         ...documentInfo,
 
-        id: idOfchecklist,
+        id: idOfChecklist,
         loading: true,
         subscribed: true,
         handleIdOfSubscription: handleIdOfSubscription,
@@ -208,15 +208,15 @@ registerAction({
 registerAction({
   type: 'data.checklists.document.terminateSubscription',
   schema: {
-    idOfchecklist: String,
+    idOfChecklist: String,
   },
   scopePath: [
     'data.checklists.documents',
   ],
   reducer: (scopedState, {
-    idOfchecklist,
+    idOfChecklist,
   }) => {
-    const documentInfo = scopedState[idOfchecklist];
+    const documentInfo = scopedState[idOfChecklist];
 
     // If document is never loaded, do nothing.
     if (!documentInfo) {
@@ -244,7 +244,7 @@ registerAction({
     return {
       ...scopedState,
 
-      [idOfchecklist]: {
+      [idOfChecklist]: {
         ...documentInfo,
 
         handleIdOfSubscription: null,
@@ -257,7 +257,7 @@ registerAction({
 registerAction({
   type: 'data.checklists.document.updateLocal',
   schema: {
-    idOfchecklist: String,
+    idOfChecklist: String,
     document: {
       type: Object,
       blackbox: true,
@@ -267,10 +267,10 @@ registerAction({
     'data.checklists.documents',
   ],
   reducer: (scopedState, {
-    idOfchecklist,
+    idOfChecklist,
     document,
   }) => {
-    const documentInfo = scopedState[idOfchecklist];
+    const documentInfo = scopedState[idOfChecklist];
 
     if (documentInfo) {
       const isDocumentLoading = objectPath.get(documentInfo, 'loading', false);
@@ -286,7 +286,7 @@ registerAction({
     return {
       ...scopedState,
 
-      [idOfchecklist]: {
+      [idOfChecklist]: {
         ...documentInfo,
 
         loading: false,
@@ -301,7 +301,7 @@ registerAction({
 registerAction({
   type: 'data.checklists.document.loadFromSsr',
   schema: {
-    idOfchecklist: String,
+    idOfChecklist: String,
     document: {
       type: Object,
       optional: true,
@@ -312,14 +312,14 @@ registerAction({
     'data.checklists.documents',
   ],
   reducer: (scopedState, {
-    idOfchecklist,
+    idOfChecklist,
     document,
   }) => {
     return {
       ...scopedState,
 
-      [idOfchecklist]: {
-        id: idOfchecklist,
+      [idOfChecklist]: {
+        id: idOfChecklist,
         loading: false,
         subscribed: false,
         ready: true,
@@ -463,12 +463,12 @@ registerAction({
 registerAction({
   type: 'ui.checklist.markNewlyCreatedChecklistAsOpen',
   schema: {
-    idOfchecklist: String,
+    idOfChecklist: String,
   },
   reducer: (state, {
-    idOfchecklist,
+    idOfChecklist,
   }) => {
-    if (idOfchecklist && idOfchecklist !== state['ui.checklist.idOfNewlyCreatedChecklist']) {
+    if (idOfChecklist && idOfChecklist !== state['ui.checklist.idOfNewlyCreatedChecklist']) {
       return state;
     }
 
@@ -485,7 +485,7 @@ registerAction({
 registerAction({
   type: 'ui.checklist.startWaitingConfirmationOfNewStep',
   reducer: (state, {
-    idOfchecklist,
+    idOfChecklist,
   }) => {
     return {
       ...state,
@@ -498,7 +498,7 @@ registerAction({
 registerAction({
   type: 'ui.checklist.handleResponseFromCreatingNewStep',
   schema: {
-    idOfchecklist: String,
+    idOfChecklist: String,
     step: {
       type: Object,
       blackbox: true,

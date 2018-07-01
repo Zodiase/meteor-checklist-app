@@ -53,18 +53,18 @@ const switchRouteConfigs = [
     initializingData: async (dispatch, props) => {
       console.log(`Getting data for route ${objectPath.get(props, 'match.path')}`, objectPath.get(props, 'match.params'));
 
-      const idOfchecklist = objectPath.get(props, 'match.params.id');
+      const idOfChecklist = objectPath.get(props, 'match.params.id');
 
-      const checklist = idOfchecklist && await findChecklistById.callPromise({
-        id: idOfchecklist,
+      const checklist = idOfChecklist && await findChecklistById.callPromise({
+        id: idOfChecklist,
       });
 
       if (!checklist) {
-        console.error(`Checklist 404: ${idOfchecklist}`);
+        console.error(`Checklist 404: ${idOfChecklist}`);
         // 404.
         dispatch({
           type: getAction('data.checklists.document.loadFromSsr').type,
-          idOfchecklist,
+          idOfChecklist,
           document: null,
         });
         return;
@@ -72,7 +72,7 @@ const switchRouteConfigs = [
 
       dispatch({
         type: getAction('data.checklists.document.loadFromSsr').type,
-        idOfchecklist,
+        idOfChecklist,
         document: checklist,
       });
     },

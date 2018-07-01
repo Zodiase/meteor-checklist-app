@@ -48,18 +48,18 @@ const styles = (theme) => ({
 export default connect(
   // mapStateToProps
   (state, ownProps) => {
-    const idOfchecklist = objectPath.get(ownProps, 'match.params.id');
-    const isLoadingChecklistDocument = objectPath.get(state, ['data.checklists.documents', idOfchecklist, 'loading'], false);
-    const isChecklistDocumentLoaded = objectPath.get(state, ['data.checklists.documents', idOfchecklist, 'ready'], false);
-    const checklistDocument = objectPath.get(state, ['data.checklists.documents', idOfchecklist, 'source']);
-    const updateDateOfChecklistDocument = objectPath.get(state, ['data.checklists.documents', idOfchecklist, 'lastUpdated'], 0);
+    const idOfChecklist = objectPath.get(ownProps, 'match.params.id');
+    const isLoadingChecklistDocument = objectPath.get(state, ['data.checklists.documents', idOfChecklist, 'loading'], false);
+    const isChecklistDocumentLoaded = objectPath.get(state, ['data.checklists.documents', idOfChecklist, 'ready'], false);
+    const checklistDocument = objectPath.get(state, ['data.checklists.documents', idOfChecklist, 'source']);
+    const updateDateOfChecklistDocument = objectPath.get(state, ['data.checklists.documents', idOfChecklist, 'lastUpdated'], 0);
     const idOfNewlyCreatedChecklist = objectPath.get(state, ['ui.checklist.idOfNewlyCreatedChecklist']);
-    const isNewlyCreatedChecklist = idOfchecklist === idOfNewlyCreatedChecklist;
+    const isNewlyCreatedChecklist = idOfChecklist === idOfNewlyCreatedChecklist;
     const isWaitingConfirmationOfNewStep = objectPath.get(state, ['ui.checklist.waitingConfirmationOfNewStep'], false);
     const errorWhenCreatingNewStep = objectPath.get(state, ['ui.checklist.errorWhenCreatingNewStep'], null);
 
     return {
-      idOfchecklist,
+      idOfChecklist,
       isLoadingChecklistDocument,
       isChecklistDocumentLoaded,
       checklistDocument,
@@ -71,23 +71,23 @@ export default connect(
   },
   // mapDispatchToProps
   (dispatch, ownProps) => {
-    const idOfchecklist = objectPath.get(ownProps, 'match.params.id');
+    const idOfChecklist = objectPath.get(ownProps, 'match.params.id');
 
     return {
       markNewlyCreatedChecklistAsOpen: () => {
         dispatch({
           type: getAction('ui.checklist.markNewlyCreatedChecklistAsOpen').type,
-          idOfchecklist,
+          idOfChecklist,
         });
       },
       subscribeChecklist: () => {
         dispatch({
           type: getAction('data.checklists.document.subscribe').type,
-          idOfchecklist,
+          idOfChecklist,
           onDocumentUpdate: (document) => {
             defer(() => dispatch({
               type: getAction('data.checklists.document.updateLocal').type,
-              idOfchecklist,
+              idOfChecklist,
               document,
             }));
           },
@@ -96,18 +96,18 @@ export default connect(
       stopSubscriptionOfChecklist: () => {
         dispatch({
           type: getAction('data.checklists.document.terminateSubscription').type,
-          idOfchecklist,
+          idOfChecklist,
         });
       },
       modifyChecklist: debounce((changes) => {
         console.log('Sending changes...', {
-          idOfchecklist,
+          idOfChecklist,
           changes,
         });
 
         //! Update state to reflect changes?
         updateChecklist.call({
-          id: idOfchecklist,
+          id: idOfChecklist,
           changes,
         });
       }, 2000),
@@ -117,7 +117,7 @@ export default connect(
         });
 
         addStepToChecklist.call({
-          idOfchecklist,
+          idOfChecklist,
           step: {
             ...stepObj,
             id: uuid(),
@@ -125,7 +125,7 @@ export default connect(
         }, (error, response) => {
           dispatch({
             type: getAction('ui.checklist.handleResponseFromCreatingNewStep').type,
-            idOfchecklist,
+            idOfChecklist,
             step: stepObj,
             error,
             response,

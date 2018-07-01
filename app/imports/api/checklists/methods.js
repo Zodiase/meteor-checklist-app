@@ -125,17 +125,17 @@ export
 const addStep = createMethod({
   name: 'checklists.methods.addStep',
   schema: {
-    idOfchecklist: String,
+    idOfChecklist: String,
     step: StepSchema,
   },
   method: ({
-    idOfchecklist,
+    idOfChecklist,
     step,
   }) => {
-    console.log('checklists.methods.addStep', idOfchecklist, step);
+    console.log('checklists.methods.addStep', idOfChecklist, step);
 
     const updateCount = Checklists.update({
-      _id: idOfchecklist,
+      _id: idOfChecklist,
     }, {
       $push: {
         steps: step,

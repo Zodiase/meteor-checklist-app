@@ -53,7 +53,7 @@ const isSubset = (objA, objB) => {
 export default
 class ChecklistItemPage extends React.Component {
   static propTypes = {
-    idOfchecklist: PropTypes.string.isRequired,
+    idOfChecklist: PropTypes.string.isRequired,
     isLoadingChecklistDocument: PropTypes.bool.isRequired,
     isChecklistDocumentLoaded: PropTypes.bool.isRequired,
     checklistDocument: PropTypes.shape({
