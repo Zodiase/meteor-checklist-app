@@ -13,6 +13,15 @@ import {
   respondMark,
   endCallMark,
 } from '/imports/consts.shared';
+import {
+  registerLegends,
+} from '/imports/log-icon-legend';
+
+registerLegends({
+  'method call mark': callMark,
+  'method response mark': respondMark,
+  'method end mark': endCallMark,
+});
 
 const createMethod = ({
   name,

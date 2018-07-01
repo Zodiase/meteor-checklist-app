@@ -7,6 +7,13 @@ import {
 import {
   publicationMark,
 } from '/imports/consts.server';
+import {
+  registerLegends,
+} from '/imports/log-icon-legend';
+
+registerLegends({
+  'publication mark': publicationMark,
+});
 
 const createPublication = (pubName, pubFunc) => {
   /**

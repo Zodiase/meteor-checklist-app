@@ -30,6 +30,9 @@ import {
   baseUrl,
   pageSsrMark,
 } from '/imports/consts.server';
+import {
+  printLegends,
+} from '/imports/log-icon-legend';
 import App from '/imports/ui/App';
 import {
   initializingReduxStoreForRouteSsr,
@@ -40,6 +43,8 @@ import {
 } from '/imports/ui/redux-store';
 import '/imports/api/checklists/publications';
 import './sentry';
+
+printLegends();
 
 onPageLoad(async (sink) => {
   const clientLocation = sink.request.url;
