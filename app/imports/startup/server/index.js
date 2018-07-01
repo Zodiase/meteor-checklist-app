@@ -87,7 +87,7 @@ onPageLoad(async (sink) => {
   const preloadedState = globalStateStore.getState();
   const helmet = Helmet.renderStatic();
 
-  console.log('Preloaded State', preloadedState);
+  console.log('Preloaded State', JSON.stringify(preloadedState, null, 2));
 
   sink.renderIntoElementById('app', initialHtml);
   sink.appendToHead(`\n${helmet.meta.toString()}\n`);
