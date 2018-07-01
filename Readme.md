@@ -15,3 +15,12 @@ Let’s start simple and say the app should first support me doing my morning an
 ## MVP Feature List
 
 See the list at https://github.com/Zodiase/meteor-checklist-app/milestone/1
+
+## Other Notes
+
+### Run the app at some sub-directory, instead of root of domain.
+
+Suppose we want the app to be running at `http://localhost:3000/my-checklist-app`.
+
+- In `app/settings.json`, change `public.baseUrl` to `'my-checklist-app'`.
+- When running the app, set `ROOT_URL` to `'http://localhost:3000/my-checklist-app'`.
