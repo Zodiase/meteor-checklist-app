@@ -192,7 +192,7 @@ class ChecklistItemPage extends React.Component {
       copyOfTheLastErrorWhenCreatingNewStep,
     } = this.state;
 
-    const displayedChecklistName = checklistDocument.name || voidChecklistName;
+    const displayedChecklistName = isChecklistDocumentLoaded && checklistDocument && (checklistDocument.name || voidChecklistName);
 
     return (
       <div>
