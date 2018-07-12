@@ -181,6 +181,12 @@ class ChecklistItemPage extends React.Component {
     });
   };
 
+  onSubmitEditsForStep = (event) => {
+    event.preventDefault();
+
+    this.terminateEditModeForStep();
+  };
+
   onAcknowledgeErrorWhenCreatingNewStep = () => {
     this.props.acknowledgeErrorWhenCreatingNewStep();
   };
@@ -241,31 +247,35 @@ class ChecklistItemPage extends React.Component {
     const isBeingEdited = idOfStepBeingEdited && (idOfStepBeingEdited === id);
 
     return (
-      <ListItem
+      <form
         key={id}
-        {...(!isBeingEdited && {
-          button: true,
-          onClick: () => this.initiateEditModeForStep(id),
-        })}
+        onSubmit={this.onSubmitEditsForStep}
       >
-        {isBeingEdited
-        ? (
-          <TextField
-            autoFocus
-            placeholder="Placeholder"
-            value={textOfTheDescriptionOfTheStepBeingEdited}
-            onChange={this.onChangeActivelyEditedStepDescription}
-            onBlur={this.terminateEditModeForStep}
-            margin="none"
-            fullWidth
-          />
-        )
-        : (
-          <ListItemText
-            primary={description}
-          />
-        )}
-      </ListItem>
+        <ListItem
+          {...(!isBeingEdited && {
+            button: true,
+            onClick: () => this.initiateEditModeForStep(id),
+          })}
+        >
+          {isBeingEdited
+          ? (
+            <TextField
+              autoFocus
+              placeholder="Placeholder"
+              value={textOfTheDescriptionOfTheStepBeingEdited}
+              onChange={this.onChangeActivelyEditedStepDescription}
+              onBlur={this.terminateEditModeForStep}
+              margin="none"
+              fullWidth
+            />
+            )
+            : (
+              <ListItemText
+                primary={description}
+              />
+            )}
+        </ListItem>
+      </form>
     );
   };
 
@@ -376,6 +386,7 @@ class ChecklistItemPage extends React.Component {
           && checklistDocument.steps.map(this.renderListItemForStep)}
 
           <form
+            // The form element is outside of the list so it doesn't interfere the flexbox layout.
             onSubmit={this.onSubmitNewStep}
           >
             <ListItem>
