@@ -244,10 +244,28 @@ const removeStep = createMethod({
     idOfChecklist,
     stepId,
   }) {
+    const selector = {
+      _id: idOfChecklist,
+    };
+    const checklist = Checklists.findOne(selector);
+
+    if (!checklist) {
+      return {
+        success: false,
+      };
+    }
+
+    const step = checklist.steps.find((someStep) => someStep.id === stepId);
+
+    if (!step) {
+      return {
+        success: false,
+      };
+    }
+
+    // Mini-mongo doesn't yet support "the filtered positional operator".
     const updateCount = Checklists.update(
-      {
-        _id: idOfChecklist,
-      },
+      selector,
       {
         $pull: {
           steps: {
@@ -256,6 +274,28 @@ const removeStep = createMethod({
         },
       },
     );
+
+    if (!this.isSimulation) {
+      // Only on server, fix order so there is no gap.
+      // `arrayFilters` not yet supported by Meteor.
+      Checklists.rawCollection().update(
+        selector,
+        {
+          $inc: {
+            'steps.$[trailing].order': -1,
+          },
+        },
+        {
+          arrayFilters: [
+            {
+              'trailing.order': {
+                $gt: step.order,
+              },
+            },
+          ],
+        },
+      );
+    }
 
     return {
       success: updateCount > 0,

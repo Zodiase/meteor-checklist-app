@@ -45,10 +45,11 @@ const createMethod = ({
     clean: true,
   }) : null;
 
-  const run = async (...callArgs) => {
+  const run = async function (...callArgs) {
     console.group(callMark, name, callArgs);
 
-    const result = await method(...callArgs);
+    // It's important to pass the context object so the method can read `this.isSimulation`.
+    const result = await method.call(this, ...callArgs);
 
     console.log(respondMark, result);
 

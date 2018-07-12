@@ -170,6 +170,8 @@ class ChecklistItemPage extends React.Component {
     });
     this.props.addStepToChecklist({
       description: descriptionOfNewStep,
+      // Assign order to the last.
+      order: this.props.checklistDocument.steps.length,
     });
   };
 
