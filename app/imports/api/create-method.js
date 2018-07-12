@@ -31,7 +31,12 @@ const createMethod = ({
   const simpleSchema = schema
   && (schema instanceof SimpleSchema
     ? schema
-    : new SimpleSchema(schema)
+    : new SimpleSchema(schema, {
+      // Make sure empty strings are valid inputs.
+      clean: {
+        removeEmptyStrings: false,
+      },
+    })
   );
   /**
    * `clean: true` is important to make sure the object is cleaned before validation.

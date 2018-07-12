@@ -1,18 +1,19 @@
 import defer from 'lodash/defer';
-import debounce from 'lodash/debounce';
 import uuid from 'uuid/v4';
 import {
   connect,
 } from 'react-redux';
 import objectPath from 'object-path';
-import { withStyles } from '@material-ui/core/styles';
+import {
+  withStyles,
+} from '@material-ui/core/styles';
 
 import {
   getAction,
 } from '/imports/ui/redux-store';
 
 import {
-  update as updateChecklist,
+  updateName as updateNameOfChecklist,
   addStep as addStepToChecklist,
 } from '/imports/api/checklists/methods';
 
@@ -99,18 +100,16 @@ export default connect(
           idOfChecklist,
         });
       },
-      modifyChecklist: debounce((changes) => {
-        console.log('Sending changes...', {
-          idOfChecklist,
-          changes,
-        });
+      updateNameOfChecklist: (newName) => {
+        //! Show indicator for pending changes.
 
-        //! Update state to reflect changes?
-        updateChecklist.call({
-          id: idOfChecklist,
-          changes,
+        updateNameOfChecklist.call({
+          idOfChecklist,
+          newName,
+        }, (/* error, response */) => {
+          //! Hide indicator for pending changes.
         });
-      }, 2000),
+      },
       addStepToChecklist: (stepObj) => {
         dispatch({
           type: getAction('ui.checklist.startWaitingConfirmationOfNewStep').type,

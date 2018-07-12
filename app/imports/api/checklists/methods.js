@@ -139,6 +139,35 @@ const remove = createMethod({
 });
 
 export
+const updateName = createMethod({
+  name: 'checklists.methods.updateName',
+  schema: {
+    idOfChecklist: String,
+    newName: String,
+  },
+  method ({
+    idOfChecklist,
+    newName,
+  }) {
+    const updateCount = Checklists.update(
+      {
+        _id: idOfChecklist,
+      },
+      {
+        $set: {
+          name: newName,
+        },
+      },
+    );
+
+    return {
+      success: updateCount > 0,
+      newName,
+    };
+  },
+});
+
+export
 const addStep = createMethod({
   name: 'checklists.methods.addStep',
   schema: {

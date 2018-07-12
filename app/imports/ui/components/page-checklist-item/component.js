@@ -1,6 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
-import omit from 'lodash/omit';
 import objectPath from 'object-path';
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -32,21 +31,6 @@ import {
 import AppBarBackButton from '/imports/ui/components/appbar-back-button';
 import AppBarLoadingProgress from '/imports/ui/components/appbar-loading-progress';
 
-import {
-  ClientSideCreationSchema,
-} from '/imports/api/checklists/schema';
-
-const isSubset = (objA, objB) => {
-  return Object.entries(objA)
-    .reduce((acc, [key, value]) => {
-      if (!acc) {
-        return false;
-      }
-
-      return isEqual(objB[key], value);
-    }, true);
-};
-
 export default
 class ChecklistItemPage extends React.Component {
   static propTypes = {
@@ -67,7 +51,7 @@ class ChecklistItemPage extends React.Component {
     markNewlyCreatedChecklistAsOpen: PropTypes.func.isRequired,
     subscribeChecklist: PropTypes.func.isRequired,
     stopSubscriptionOfChecklist: PropTypes.func.isRequired,
-    modifyChecklist: PropTypes.func.isRequired,
+    updateNameOfChecklist: PropTypes.func.isRequired,
     addStepToChecklist: PropTypes.func.isRequired,
     acknowledgeErrorWhenCreatingNewStep: PropTypes.func.isRequired,
   };
@@ -81,85 +65,42 @@ class ChecklistItemPage extends React.Component {
     super(props);
 
     this.state = {
+      // If true, the title should be editable.
       inTitleEditMode: true,
-      copyOfOriginalChecklistDocument: null,
-      // Date stored as number.
-      updateDateOfChecklistDocument: 0,
-      mapOfEditsToChecklistDocument: null,
-      mapOfEditsToChecklistDocumentIsDirty: false,
+      // If true, the document has been successfully loaded. This is used to detect if the document is deleted.
+      hasLoadedDocument: false,
+      // If true, an update is in progress to save the changes.
+      isSavingChanges: false,
+      // Transitionary field for storing the description of the new step to be created.
       textOfTheDescriptionOfTheNewStep: '',
+      // Copy of the error so the error message could be discarded at a later point.
       copyOfTheLastErrorWhenCreatingNewStep: null,
     };
   }
 
   static getDerivedStateFromProps (props, state) {
     const moreState = {};
-    const listOfNamesOfThePropertiesThatAreSubjectToChange = [
-      'modifyDate',
-    ];
 
-    // Load a copy of the checklist.
+    // The checklist is loaded for the first time.
     if (
       // Document loaded
       props.isChecklistDocumentLoaded
       // and is valid
       && props.checklistDocument
-      // and not copied yet.
-      && !state.copyOfOriginalChecklistDocument
+      // Never loaded before.
+      && !state.hasLoadedDocument
     ) {
-      moreState.copyOfOriginalChecklistDocument = cloneDeep(props.checklistDocument);
-      moreState.updateDateOfChecklistDocument = props.updateDateOfChecklistDocument;
-      moreState.mapOfEditsToChecklistDocument = {};
-      moreState.mapOfEditsToChecklistDocumentIsDirty = false;
-
-      console.info('Local copy of the checklist saved.', {
-        extDoc: props.checklistDocument,
-        copyDoc: moreState.copyOfOriginalChecklistDocument,
-      });
+      moreState.hasLoadedDocument = true;
     }
 
-    // The checklist is changed externally (for whatever reason).
-    if (
-      // Document loaded
-      props.isChecklistDocumentLoaded
-      // and is valid
-      && props.checklistDocument
-      // and has non-empty copy
-      && state.copyOfOriginalChecklistDocument
-      // and copy is out of date.
-      && !isEqual(
-        omit(props.checklistDocument, listOfNamesOfThePropertiesThatAreSubjectToChange),
-        omit(state.copyOfOriginalChecklistDocument, listOfNamesOfThePropertiesThatAreSubjectToChange),
-      )
-      // and newer.
-      && props.updateDateOfChecklistDocument > state.updateDateOfChecklistDocument
-    ) {
-      // Update original copy to the latest version from server.
-      moreState.copyOfOriginalChecklistDocument = props.checklistDocument;
-      moreState.updateDateOfChecklistDocument = props.updateDateOfChecklistDocument;
-
-      // Reduce `mapOfEditsToChecklistDocument` by removing properties that are present and identical on the (new) original copy.
-      const listOfMinimalChanges = Object.entries(ClientSideCreationSchema.clean(state.mapOfEditsToChecklistDocument))
-        .filter(([key, value]) => !isEqual(value, props.checklistDocument[key]));
-
-      moreState.mapOfEditsToChecklistDocumentIsDirty = listOfMinimalChanges.length > 0;
-
-      const newEditingCopy = listOfMinimalChanges.reduce((acc, [key, value]) => ({
-        ...acc,
-        [key]: value,
-      }), {});
-
-      moreState.mapOfEditsToChecklistDocument = newEditingCopy;
-    }
-
-    // The checklist is changed externally (for whatever reason).
+    // The checklist disappeared after loaded.
     if (
       // Document loaded
       props.isChecklistDocumentLoaded
       // and is empty
       && !props.checklistDocument
-      // and has non-empty copy
-      && state.copyOfOriginalChecklistDocument
+      // and was loaded.
+      && state.hasLoadedDocument
     ) {
       console.error('Unexpected Exception. Checklist was deleted externally.');
     }
@@ -202,13 +143,17 @@ class ChecklistItemPage extends React.Component {
     });
   };
 
-  onChangeTitle = (event) => {
-    this.setChecklistProperty('name', event.target.value);
+  onChangeChecklistName = (event) => {
+    const newName = event.target.value;
+
+    this.props.updateNameOfChecklist(newName);
   };
 
   onChangeDescriptionOfNewStep = (event) => {
+    const newDescription = event.target.value;
+
     this.setState({
-      textOfTheDescriptionOfTheNewStep: event.target.value,
+      textOfTheDescriptionOfTheNewStep: newDescription,
     });
   };
 
@@ -217,68 +162,17 @@ class ChecklistItemPage extends React.Component {
 
     const descriptionOfNewStep = this.state.textOfTheDescriptionOfTheNewStep;
 
-    this.props.addStepToChecklist({
-      description: descriptionOfNewStep,
-    });
-
     this.setState({
       textOfTheDescriptionOfTheNewStep: '',
+    });
+    this.props.addStepToChecklist({
+      description: descriptionOfNewStep,
     });
   };
 
   onAcknowledgeErrorWhenCreatingNewStep = () => {
     this.props.acknowledgeErrorWhenCreatingNewStep();
   };
-
-  getCleanChecklistProperty (propName, defaultValue) {
-    const propertyValueFromOriginalCopy = objectPath.get(this.state.copyOfOriginalChecklistDocument, [propName], defaultValue);
-
-    return propertyValueFromOriginalCopy;
-  }
-
-  getDirtyChecklistProperty (propName, defaultValue) {
-    const propertyValueFromEditingCopy = objectPath.get(this.state.mapOfEditsToChecklistDocument, [propName]);
-
-    if (typeof propertyValueFromEditingCopy !== 'undefined') {
-      return propertyValueFromEditingCopy;
-    }
-
-    return this.getCleanChecklistProperty(propName, defaultValue);
-  }
-
-  setChecklistProperty (propName, value) {
-    const editingCopy = cloneDeep(this.state.mapOfEditsToChecklistDocument);
-
-    objectPath.set(editingCopy, [propName], value);
-
-    const isEditingCopyDirty = this.isChecklistCopyDirty(editingCopy);
-
-    this.sendUpdatesToServer(editingCopy);
-
-    this.setState({
-      mapOfEditsToChecklistDocument: editingCopy,
-      mapOfEditsToChecklistDocumentIsDirty: isEditingCopyDirty,
-    });
-  }
-
-  getFullCopyOfEditingChecklist (editingCopy) {
-    return {
-      ...cloneDeep(this.state.copyOfOriginalChecklistDocument),
-      ...cloneDeep(editingCopy),
-    };
-  }
-
-  isChecklistCopyDirty (checklistDocument) {
-    return !isSubset(checklistDocument, this.state.copyOfOriginalChecklistDocument);
-  }
-
-  /**
-   * Initiates a request for server to update the checklist document.
-   * @param  {Object} editingCopy
-   */
-  sendUpdatesToServer (editingCopy) {
-    this.props.modifyChecklist(editingCopy);
-  }
 
   render () {
     const {
@@ -292,25 +186,24 @@ class ChecklistItemPage extends React.Component {
     } = this.props;
     const {
       inTitleEditMode,
-      copyOfOriginalChecklistDocument,
-      mapOfEditsToChecklistDocumentIsDirty,
+      hasLoadedDocument,
+      isSavingChanges,
       textOfTheDescriptionOfTheNewStep,
       copyOfTheLastErrorWhenCreatingNewStep,
     } = this.state;
 
-    const cleanChecklistName = this.getCleanChecklistProperty('name', '');
-    const dirtyChecklistName = this.getDirtyChecklistProperty('name', '');
+    const displayedChecklistName = checklistDocument.name || voidChecklistName;
 
     return (
       <div>
         <Helmet>
           <title>Loading...</title>
           {isChecklistDocumentLoaded && checklistDocument && (
-            <title>{cleanChecklistName || voidChecklistName}</title>
+            <title>{displayedChecklistName}</title>
           )}
         </Helmet>
 
-        {isChecklistDocumentLoaded && !checklistDocument && !copyOfOriginalChecklistDocument && (
+        {isChecklistDocumentLoaded && !checklistDocument && !hasLoadedDocument && (
           <Redirect
             push
             to="/"
@@ -338,15 +231,15 @@ class ChecklistItemPage extends React.Component {
                   }}
                   onClick={this.onClickTitle}
                 >
-                  {cleanChecklistName || voidChecklistName}
+                  {displayedChecklistName}
                 </Button>
               )}
               {isChecklistDocumentLoaded && checklistDocument && inTitleEditMode && (
                 <TextField
                   autoFocus={isNewlyCreatedChecklist}
                   placeholder={voidChecklistName}
-                  value={dirtyChecklistName}
-                  onChange={this.onChangeTitle}
+                  value={checklistDocument.name}
+                  onChange={this.onChangeChecklistName}
                   margin="none"
                   InputProps={{
                     classes: {
@@ -359,11 +252,11 @@ class ChecklistItemPage extends React.Component {
                           size={24}
                           thickness={5}
                           color="inherit"
-                          variant={mapOfEditsToChecklistDocumentIsDirty ? 'indeterminate' : 'determinate'}
-                          value={mapOfEditsToChecklistDocumentIsDirty ? 0 : 100}
+                          variant={isSavingChanges ? 'indeterminate' : 'determinate'}
+                          value={isSavingChanges ? 0 : 100}
                           style={{
                             transition: 'opacity 60ms ease-out 0.9s',
-                            opacity: mapOfEditsToChecklistDocumentIsDirty ? 1 : 0,
+                            opacity: isSavingChanges ? 1 : 0,
                           }}
                         />
                       </InputAdornment>

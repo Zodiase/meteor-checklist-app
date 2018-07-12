@@ -34,6 +34,10 @@ const StoredSchema = new SimpleSchema({
     defaultValue: [],
   },
   'steps.$': StepSchema,
+}, {
+  clean: {
+    removeEmptyStrings: false,
+  },
 });
 
 export
