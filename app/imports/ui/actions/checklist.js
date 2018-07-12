@@ -18,8 +18,6 @@ import {
 } from '/imports/api/checklists/methods';
 import {
   ClientSideCreationSchema,
-  transformForIndex,
-  transformToFull,
 } from '/imports/api/checklists/schema';
 import {
   sortByCreateDate,
@@ -58,6 +56,7 @@ registerAction({
             sortByCreateDate,
           ],
           // Be aware of transforming here. The data sent from server could already be transformed.
+          transform: null,
         },
       );
 
@@ -194,7 +193,8 @@ registerAction({
           _id: idOfChecklist,
         },
         {
-          transform: transformToFull,
+          // Be aware of transforming here. The data sent from server could already be transformed.
+          transform: null,
         },
       );
 
