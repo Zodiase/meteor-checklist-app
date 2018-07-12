@@ -14,7 +14,6 @@ import {
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -24,8 +23,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Snackbar from '@material-ui/core/Snackbar';
-import SaveIcon from '@material-ui/icons/CloudUpload';
-import CheckIcon from '@material-ui/icons/Check';
 import AddIcon from '@material-ui/icons/Add';
 
 import {
@@ -41,13 +38,13 @@ import {
 
 const isSubset = (objA, objB) => {
   return Object.entries(objA)
-  .reduce((acc, [key, value]) => {
-    if (!acc) {
-      return false;
-    }
+    .reduce((acc, [key, value]) => {
+      if (!acc) {
+        return false;
+      }
 
-    return isEqual(objB[key], value);
-  }, true);
+      return isEqual(objB[key], value);
+    }, true);
 };
 
 export default
@@ -80,7 +77,22 @@ class ChecklistItemPage extends React.Component {
     errorWhenCreatingNewStep: null,
   };
 
-  static getDerivedStateFromProps(props, state) {
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      inTitleEditMode: true,
+      copyOfOriginalChecklistDocument: null,
+      // Date stored as number.
+      updateDateOfChecklistDocument: 0,
+      mapOfEditsToChecklistDocument: null,
+      mapOfEditsToChecklistDocumentIsDirty: false,
+      textOfTheDescriptionOfTheNewStep: '',
+      copyOfTheLastErrorWhenCreatingNewStep: null,
+    };
+  }
+
+  static getDerivedStateFromProps (props, state) {
     const moreState = {};
     const listOfNamesOfThePropertiesThatAreSubjectToChange = [
       'modifyDate',
@@ -117,7 +129,7 @@ class ChecklistItemPage extends React.Component {
       // and copy is out of date.
       && !isEqual(
         omit(props.checklistDocument, listOfNamesOfThePropertiesThatAreSubjectToChange),
-        omit(state.copyOfOriginalChecklistDocument, listOfNamesOfThePropertiesThatAreSubjectToChange)
+        omit(state.copyOfOriginalChecklistDocument, listOfNamesOfThePropertiesThatAreSubjectToChange),
       )
       // and newer.
       && props.updateDateOfChecklistDocument > state.updateDateOfChecklistDocument
@@ -128,7 +140,7 @@ class ChecklistItemPage extends React.Component {
 
       // Reduce `mapOfEditsToChecklistDocument` by removing properties that are present and identical on the (new) original copy.
       const listOfMinimalChanges = Object.entries(ClientSideCreationSchema.clean(state.mapOfEditsToChecklistDocument))
-      .filter(([key, value]) => !isEqual(value, props.checklistDocument[key]));
+        .filter(([key, value]) => !isEqual(value, props.checklistDocument[key]));
 
       moreState.mapOfEditsToChecklistDocumentIsDirty = listOfMinimalChanges.length > 0;
 
@@ -164,21 +176,6 @@ class ChecklistItemPage extends React.Component {
     return moreState;
   }
 
-  constructor (props) {
-    super(props);
-
-    this.state = {
-      inTitleEditMode: true,
-      copyOfOriginalChecklistDocument: null,
-      // Date stored as number.
-      updateDateOfChecklistDocument: 0,
-      mapOfEditsToChecklistDocument: null,
-      mapOfEditsToChecklistDocumentIsDirty: false,
-      textOfTheDescriptionOfTheNewStep: '',
-      copyOfTheLastErrorWhenCreatingNewStep: null,
-    };
-  }
-
   componentDidMount () {
     this.props.subscribeChecklist();
   }
@@ -198,6 +195,40 @@ class ChecklistItemPage extends React.Component {
   componentWillUnmount () {
     this.props.stopSubscriptionOfChecklist();
   }
+
+  onClickTitle = () => {
+    this.setState({
+      inTitleEditMode: true,
+    });
+  };
+
+  onChangeTitle = (event) => {
+    this.setChecklistProperty('name', event.target.value);
+  };
+
+  onChangeDescriptionOfNewStep = (event) => {
+    this.setState({
+      textOfTheDescriptionOfTheNewStep: event.target.value,
+    });
+  };
+
+  onSubmitNewStep = (event) => {
+    event.preventDefault();
+
+    const descriptionOfNewStep = this.state.textOfTheDescriptionOfTheNewStep;
+
+    this.props.addStepToChecklist({
+      description: descriptionOfNewStep,
+    });
+
+    this.setState({
+      textOfTheDescriptionOfTheNewStep: '',
+    });
+  };
+
+  onAcknowledgeErrorWhenCreatingNewStep = () => {
+    this.props.acknowledgeErrorWhenCreatingNewStep();
+  };
 
   getCleanChecklistProperty (propName, defaultValue) {
     const propertyValueFromOriginalCopy = objectPath.get(this.state.copyOfOriginalChecklistDocument, [propName], defaultValue);
@@ -249,40 +280,6 @@ class ChecklistItemPage extends React.Component {
     this.props.modifyChecklist(editingCopy);
   }
 
-  onClickTitle = () => {
-    this.setState({
-      inTitleEditMode: true,
-    });
-  };
-
-  onChangeTitle = (event) => {
-    this.setChecklistProperty('name', event.target.value);
-  };
-
-  onChangeDescriptionOfNewStep = (event) => {
-    this.setState({
-      textOfTheDescriptionOfTheNewStep: event.target.value,
-    });
-  };
-
-  onSubmitNewStep = (event) => {
-    event.preventDefault();
-
-    const descriptionOfNewStep = this.state.textOfTheDescriptionOfTheNewStep;
-
-    this.props.addStepToChecklist({
-      description: descriptionOfNewStep,
-    });
-
-    this.setState({
-      textOfTheDescriptionOfTheNewStep: '',
-    });
-  };
-
-  onAcknowledgeErrorWhenCreatingNewStep = () => {
-    this.props.acknowledgeErrorWhenCreatingNewStep();
-  };
-
   render () {
     const {
       classes,
@@ -327,14 +324,22 @@ class ChecklistItemPage extends React.Component {
               to="/checklist/index"
             />
 
-            <Typography variant="title" color="inherit" style={{flex: 1}}>
+            <Typography
+              variant="title"
+              color="inherit"
+              style={{
+                flex: 1,
+              }}
+            >
               {isChecklistDocumentLoaded && checklistDocument && !inTitleEditMode && (
                 <Button
                   classes={{
                     root: classes.appBarTitleButton,
                   }}
                   onClick={this.onClickTitle}
-                >{cleanChecklistName || voidChecklistName}</Button>
+                >
+                  {cleanChecklistName || voidChecklistName}
+                </Button>
               )}
               {isChecklistDocumentLoaded && checklistDocument && inTitleEditMode && (
                 <TextField
@@ -416,7 +421,9 @@ class ChecklistItemPage extends React.Component {
                         disabled={isWaitingConfirmationOfNewStep}
                         size="small"
                         type="submit"
-                      >Create</Button>
+                      >
+                        Create
+                      </Button>
                     </InputAdornment>
                   ),
                 }}
@@ -449,7 +456,9 @@ class ChecklistItemPage extends React.Component {
               color="inherit"
               size="small"
               onClick={this.onAcknowledgeErrorWhenCreatingNewStep}
-            >OK</Button>,
+            >
+              OK
+            </Button>,
           ]}
         />
 
