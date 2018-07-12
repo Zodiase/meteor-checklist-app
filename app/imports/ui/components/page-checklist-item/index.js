@@ -1,5 +1,4 @@
 import defer from 'lodash/defer';
-import uuid from 'uuid/v4';
 import {
   connect,
 } from 'react-redux';
@@ -15,6 +14,7 @@ import {
 import {
   updateName as updateNameOfChecklist,
   addStep as addStepToChecklist,
+  updateStepDescription as updateStepDescriptionOfChecklist,
 } from '/imports/api/checklists/methods';
 
 import Component from './component';
@@ -119,7 +119,6 @@ export default connect(
           idOfChecklist,
           step: {
             ...stepObj,
-            id: uuid(),
           },
         }, (error, response) => {
           dispatch({
@@ -129,6 +128,15 @@ export default connect(
             error,
             response,
           });
+        });
+      },
+      updateStepDescription: (stepId, newDescription) => {
+        updateStepDescriptionOfChecklist.call({
+          idOfChecklist,
+          stepId,
+          newDescription,
+        }, (/* error, response */) => {
+          //! Hide indicator for pending changes.
         });
       },
       acknowledgeErrorWhenCreatingNewStep: () => {

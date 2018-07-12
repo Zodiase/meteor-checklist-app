@@ -53,6 +53,7 @@ class ChecklistItemPage extends React.Component {
     stopSubscriptionOfChecklist: PropTypes.func.isRequired,
     updateNameOfChecklist: PropTypes.func.isRequired,
     addStepToChecklist: PropTypes.func.isRequired,
+    updateStepDescription: PropTypes.func.isRequired,
     acknowledgeErrorWhenCreatingNewStep: PropTypes.func.isRequired,
   };
 
@@ -75,6 +76,8 @@ class ChecklistItemPage extends React.Component {
       textOfTheDescriptionOfTheNewStep: '',
       // Copy of the error so the error message could be discarded at a later point.
       copyOfTheLastErrorWhenCreatingNewStep: null,
+      idOfStepBeingEdited: '',
+      textOfTheDescriptionOfTheStepBeingEdited: '',
     };
   }
 
@@ -170,8 +173,100 @@ class ChecklistItemPage extends React.Component {
     });
   };
 
+  onChangeActivelyEditedStepDescription = (event) => {
+    const newDescription = event.target.value;
+
+    this.setState({
+      textOfTheDescriptionOfTheStepBeingEdited: newDescription,
+    });
+  };
+
   onAcknowledgeErrorWhenCreatingNewStep = () => {
     this.props.acknowledgeErrorWhenCreatingNewStep();
+  };
+
+  initiateEditModeForStep = (stepId) => {
+    if (stepId === this.state.idOfStepBeingEdited) {
+      return;
+    }
+
+    const step = this.props.checklistDocument.steps.find((someStep) => someStep.id === stepId);
+
+    if (!step) {
+      throw new Error(`Unable to initiate edit mode for step '${stepId}'. Step not found.`);
+    }
+
+    this.setState({
+      idOfStepBeingEdited: stepId,
+      textOfTheDescriptionOfTheStepBeingEdited: step.description,
+    });
+  };
+
+  terminateEditModeForStep = () => {
+    const {
+      idOfStepBeingEdited: stepId,
+      textOfTheDescriptionOfTheStepBeingEdited: newDescription,
+    } = this.state;
+
+    if (!stepId) {
+      return;
+    }
+
+    if (stepId) {
+      const step = this.props.checklistDocument.steps.find((someStep) => someStep.id === stepId);
+
+      if (step && step.description !== newDescription) {
+        this.props.updateStepDescription(
+          stepId,
+          newDescription,
+        );
+      }
+    }
+
+    this.setState({
+      idOfStepBeingEdited: '',
+      textOfTheDescriptionOfTheStepBeingEdited: '',
+    });
+  };
+
+  renderListItemForStep = (step) => {
+    const {
+      id,
+      description,
+    } = step;
+    const {
+      idOfStepBeingEdited,
+      textOfTheDescriptionOfTheStepBeingEdited,
+    } = this.state;
+    const isBeingEdited = idOfStepBeingEdited && (idOfStepBeingEdited === id);
+
+    return (
+      <ListItem
+        key={id}
+        {...(!isBeingEdited && {
+          button: true,
+          onClick: () => this.initiateEditModeForStep(id),
+        })}
+      >
+        {isBeingEdited
+        ? (
+          <TextField
+            autoFocus
+            placeholder="Placeholder"
+            value={textOfTheDescriptionOfTheStepBeingEdited}
+            onChange={this.onChangeActivelyEditedStepDescription}
+            onBlur={this.terminateEditModeForStep}
+            margin="none"
+            fullWidth
+          />
+        )
+        : (
+          <ListItemText
+            primary={description}
+          />
+        )}
+      </ListItem>
+    );
   };
 
   render () {
@@ -278,19 +373,7 @@ class ChecklistItemPage extends React.Component {
         <List>
           {isChecklistDocumentLoaded
           && checklistDocument
-          && checklistDocument.steps.map(({
-            id,
-            description,
-          }) => (
-            <ListItem
-              key={id}
-              button
-            >
-              <ListItemText
-                primary={description}
-              />
-            </ListItem>
-          ))}
+          && checklistDocument.steps.map(this.renderListItemForStep)}
 
           <form
             onSubmit={this.onSubmitNewStep}

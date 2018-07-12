@@ -5,16 +5,21 @@ import {
 } from '../common-schema-fields';
 
 export
-const StepSchema = new SimpleSchema({
-  id: {
-    type: String,
-    min: 16,
-    max: 128,
-  },
+const ClientSideCreationStepSchema = new SimpleSchema({
   description: {
     type: String,
     min: 1,
     trim: false,
+  },
+});
+
+export
+const StoredStepSchema = new SimpleSchema({
+  ...ClientSideCreationStepSchema.schema(),
+  id: {
+    type: String,
+    min: 16,
+    max: 128,
   },
 });
 
@@ -33,7 +38,7 @@ const StoredSchema = new SimpleSchema({
     type: Array,
     defaultValue: [],
   },
-  'steps.$': StepSchema,
+  'steps.$': StoredStepSchema,
 }, {
   clean: {
     removeEmptyStrings: false,

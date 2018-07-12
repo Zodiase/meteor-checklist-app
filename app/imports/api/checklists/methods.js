@@ -1,8 +1,10 @@
+import uuid from 'uuid/v4';
+
 import createMethod from '../create-method';
 
 import Checklists from './';
 import {
-  StepSchema,
+  ClientSideCreationStepSchema,
   ClientSideCreationSchema,
   transformForIndex,
 } from './schema';
@@ -172,7 +174,7 @@ const addStep = createMethod({
   name: 'checklists.methods.addStep',
   schema: {
     idOfChecklist: String,
-    step: StepSchema,
+    step: ClientSideCreationStepSchema,
   },
   method ({
     idOfChecklist,
@@ -184,7 +186,10 @@ const addStep = createMethod({
       },
       {
         $push: {
-          steps: step,
+          steps: {
+            ...step,
+            id: uuid(),
+          },
         },
       },
     );
@@ -196,20 +201,34 @@ const addStep = createMethod({
   },
 });
 
-// Checklists.update({
-//   _id: 'WTut4wETne2cCvqGd',
-// }, {
-//   $set: {
-//     steps: [],
-//   }
-// });
+export
+const updateStepDescription = createMethod({
+  name: 'checklists.methods.updateStepDescription',
+  schema: {
+    idOfChecklist: String,
+    stepId: String,
+    newDescription: String,
+  },
+  method ({
+    idOfChecklist,
+    stepId,
+    newDescription,
+  }) {
+    const updateCount = Checklists.update(
+      {
+        _id: idOfChecklist,
+        'steps.id': stepId,
+      },
+      {
+        $set: {
+          'steps.$.description': newDescription,
+        },
+      },
+    );
 
-// Checklists.update({}, {
-//   $pull: {
-//     id: {
-//       $exists: false,
-//     }
-//   },
-// }, {
-//   multi: true,
-// });
+    return {
+      success: updateCount > 0,
+      newDescription,
+    };
+  },
+});
