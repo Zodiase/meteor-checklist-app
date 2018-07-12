@@ -15,6 +15,7 @@ import {
   updateName as updateNameOfChecklist,
   addStep as addStepToChecklist,
   updateStepDescription as updateStepDescriptionOfChecklist,
+  removeStep as removeStepFromChecklist,
 } from '/imports/api/checklists/methods';
 
 import Component from './component';
@@ -131,13 +132,22 @@ export default connect(
         });
       },
       updateStepDescription: (stepId, newDescription) => {
-        updateStepDescriptionOfChecklist.call({
-          idOfChecklist,
-          stepId,
-          newDescription,
-        }, (/* error, response */) => {
-          //! Hide indicator for pending changes.
-        });
+        if (newDescription === '') {
+          removeStepFromChecklist.call({
+            idOfChecklist,
+            stepId,
+          }, (/* error, response */) => {
+            //! Hide indicator for pending changes.
+          });
+        } else {
+          updateStepDescriptionOfChecklist.call({
+            idOfChecklist,
+            stepId,
+            newDescription,
+          }, (/* error, response */) => {
+            //! Hide indicator for pending changes.
+          });
+        }
       },
       acknowledgeErrorWhenCreatingNewStep: () => {
         dispatch({

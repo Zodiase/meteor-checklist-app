@@ -232,3 +232,33 @@ const updateStepDescription = createMethod({
     };
   },
 });
+
+export
+const removeStep = createMethod({
+  name: 'checklists.methods.removeStep',
+  schema: {
+    idOfChecklist: String,
+    stepId: String,
+  },
+  method ({
+    idOfChecklist,
+    stepId,
+  }) {
+    const updateCount = Checklists.update(
+      {
+        _id: idOfChecklist,
+      },
+      {
+        $pull: {
+          steps: {
+            id: stepId,
+          },
+        },
+      },
+    );
+
+    return {
+      success: updateCount > 0,
+    };
+  },
+});
