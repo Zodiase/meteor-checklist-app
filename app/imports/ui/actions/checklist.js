@@ -57,7 +57,7 @@ registerAction({
           sort: [
             sortByCreateDate,
           ],
-          transform: transformForIndex,
+          // Be aware of transforming here. The data sent from server could already be transformed.
         },
       );
 
