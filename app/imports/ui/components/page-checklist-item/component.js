@@ -16,7 +16,6 @@ import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -30,6 +29,9 @@ import {
 
 import AppBarBackButton from '/imports/ui/components/appbar-back-button';
 import AppBarLoadingProgress from '/imports/ui/components/appbar-loading-progress';
+import SortableList from '/imports/ui/components/SortableList';
+import SortableListItem from '/imports/ui/components/SortableListItem';
+import SortableHandle from '/imports/ui/components/SortableHandle';
 
 export default
 class ChecklistItemPage extends React.Component {
@@ -54,6 +56,7 @@ class ChecklistItemPage extends React.Component {
     updateNameOfChecklist: PropTypes.func.isRequired,
     addStepToChecklist: PropTypes.func.isRequired,
     updateStepDescription: PropTypes.func.isRequired,
+    reorderStep: PropTypes.func.isRequired,
     acknowledgeErrorWhenCreatingNewStep: PropTypes.func.isRequired,
   };
 
@@ -79,6 +82,8 @@ class ChecklistItemPage extends React.Component {
       idOfStepBeingEdited: '',
       textOfTheDescriptionOfTheStepBeingEdited: '',
     };
+
+    this.rootRef = React.createRef();
   }
 
   static getDerivedStateFromProps (props, state) {
@@ -170,8 +175,6 @@ class ChecklistItemPage extends React.Component {
     });
     this.props.addStepToChecklist({
       description: descriptionOfNewStep,
-      // Assign order to the last.
-      order: this.props.checklistDocument.steps.length,
     });
   };
 
@@ -189,11 +192,19 @@ class ChecklistItemPage extends React.Component {
     this.terminateEditModeForStep();
   };
 
+  onSortStepEnd = ({
+    oldIndex,
+    newIndex,
+  }) => {
+    this.props.reorderStep(oldIndex, newIndex);
+  };
+
   onAcknowledgeErrorWhenCreatingNewStep = () => {
     this.props.acknowledgeErrorWhenCreatingNewStep();
   };
 
   initiateEditModeForStep = (stepId) => {
+    console.log('initiateEditModeForStep');
     if (stepId === this.state.idOfStepBeingEdited) {
       return;
     }
@@ -249,18 +260,10 @@ class ChecklistItemPage extends React.Component {
     const isBeingEdited = idOfStepBeingEdited && (idOfStepBeingEdited === id);
 
     return (
-      <form
-        key={id}
-        onSubmit={this.onSubmitEditsForStep}
-      >
-        <ListItem
-          {...(!isBeingEdited && {
-            button: true,
-            onClick: () => this.initiateEditModeForStep(id),
-          })}
-        >
-          {isBeingEdited
-          ? (
+      <ListItemText
+        {...(isBeingEdited
+        ? {
+          primary: (
             <TextField
               autoFocus
               placeholder="Placeholder"
@@ -270,14 +273,13 @@ class ChecklistItemPage extends React.Component {
               margin="none"
               fullWidth
             />
-            )
-            : (
-              <ListItemText
-                primary={description}
-              />
-            )}
-        </ListItem>
-      </form>
+          ),
+        }
+        : {
+          primary: description,
+          onClick: () => this.initiateEditModeForStep(id)
+        })}
+      />
     );
   };
 
@@ -302,7 +304,7 @@ class ChecklistItemPage extends React.Component {
     const displayedChecklistName = isChecklistDocumentLoaded && checklistDocument && (checklistDocument.name || voidChecklistName);
 
     return (
-      <div>
+      <div ref={this.rootRef}>
         <Helmet>
           <title>Loading...</title>
           {isChecklistDocumentLoaded && checklistDocument && (
@@ -382,10 +384,38 @@ class ChecklistItemPage extends React.Component {
           show={isLoadingChecklistDocument}
         />
 
-        <List>
-          {isChecklistDocumentLoaded
-          && checklistDocument
-          && checklistDocument.steps.map(this.renderListItemForStep)}
+        <SortableList
+          // pressDelay={200}
+          axis="y"
+          lockAxis="y"
+          lockToContainerEdges
+          lockOffset="0%"
+          useDragHandle
+          onSortEnd={this.onSortStepEnd}
+        >
+          <form
+            onSubmit={this.onSubmitEditsForStep}
+          >
+            {isChecklistDocumentLoaded
+            && checklistDocument
+            && checklistDocument.steps.map((step, index) => {
+              const {
+                id,
+              } = step;
+
+              return (
+                <SortableListItem
+                  key={id}
+                  index={index}
+                >
+                  <SortableHandle
+                    className={classes.moveIndicator}
+                  />
+                  {this.renderListItemForStep(step)}
+                </SortableListItem>
+              );
+            })}
+          </form>
 
           <form
             // The form element is outside of the list so it doesn't interfere the flexbox layout.
@@ -419,7 +449,7 @@ class ChecklistItemPage extends React.Component {
               />
             </ListItem>
           </form>
-        </List>
+        </SortableList>
 
         <pre>{JSON.stringify(checklistDocument, null, 2)}</pre>
 

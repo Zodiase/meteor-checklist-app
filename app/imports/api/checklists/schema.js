@@ -11,7 +11,6 @@ const ClientSideCreationStepSchema = new SimpleSchema({
     min: 1,
     trim: false,
   },
-  order: Number,
 });
 
 export

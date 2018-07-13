@@ -255,47 +255,64 @@ const removeStep = createMethod({
       };
     }
 
-    const step = checklist.steps.find((someStep) => someStep.id === stepId);
+    const newSteps = checklist.steps.filter((someStep) => someStep.id !== stepId);
 
-    if (!step) {
+    const updateCount = Checklists.update(
+      selector,
+      {
+        $set: {
+          steps: newSteps,
+        },
+      },
+    );
+
+    return {
+      success: updateCount > 0,
+    };
+  },
+});
+
+export
+const reorderStep = createMethod({
+  name: 'checklists.methods.reorderStep',
+  schema: {
+    idOfChecklist: String,
+    oldIndex: Number,
+    newIndex: Number,
+  },
+  method ({
+    idOfChecklist,
+    oldIndex,
+    newIndex,
+  }) {
+    const selector = {
+      _id: idOfChecklist,
+    };
+    const checklist = Checklists.findOne(selector);
+
+    if (!checklist) {
       return {
         success: false,
       };
     }
 
-    // Mini-mongo doesn't yet support "the filtered positional operator".
+    if (newIndex === oldIndex) {
+      return {
+        success: true,
+      };
+    }
+
+    const newSteps = checklist.steps.slice();
+    newSteps.splice(newIndex, 0, newSteps.splice(oldIndex, 1)[0]);
+
     const updateCount = Checklists.update(
       selector,
       {
-        $pull: {
-          steps: {
-            id: stepId,
-          },
+        $set: {
+          steps: newSteps,
         },
       },
     );
-
-    if (!this.isSimulation) {
-      // Only on server, fix order so there is no gap.
-      // `arrayFilters` not yet supported by Meteor.
-      Checklists.rawCollection().update(
-        selector,
-        {
-          $inc: {
-            'steps.$[trailing].order': -1,
-          },
-        },
-        {
-          arrayFilters: [
-            {
-              'trailing.order': {
-                $gt: step.order,
-              },
-            },
-          ],
-        },
-      );
-    }
 
     return {
       success: updateCount > 0,

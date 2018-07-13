@@ -16,6 +16,7 @@ import {
   addStep as addStepToChecklist,
   updateStepDescription as updateStepDescriptionOfChecklist,
   removeStep as removeStepFromChecklist,
+  reorderStep as reorderStepOfChecklist,
 } from '/imports/api/checklists/methods';
 
 import Component from './component';
@@ -44,6 +45,18 @@ const styles = (theme) => ({
     '&:hover:not($disabled):not($focused):not($error):before': {
       borderBottomColor: 'rgba(255, 255, 255, 0.5)',
     },
+  },
+  moveIndicator: {
+    border: '3px dotted black',
+    borderTop: 0,
+    borderBottom: 0,
+    height: '21px',
+    display: 'block',
+    position: 'absolute',
+    left: '8px',
+    width: '3px',
+    boxSizing: 'content-box',
+    opacity: 0.5,
   },
 });
 
@@ -132,6 +145,8 @@ export default connect(
         });
       },
       updateStepDescription: (stepId, newDescription) => {
+        //! Show indicator for pending changes.
+
         if (newDescription === '') {
           removeStepFromChecklist.call({
             idOfChecklist,
@@ -148,6 +163,17 @@ export default connect(
             //! Hide indicator for pending changes.
           });
         }
+      },
+      reorderStep: (oldIndex, newIndex) => {
+        //! Show indicator for pending changes.
+
+        reorderStepOfChecklist.call({
+          idOfChecklist,
+          oldIndex,
+          newIndex,
+        }, (/* error, response */) => {
+          //! Hide indicator for pending changes.
+        });
       },
       acknowledgeErrorWhenCreatingNewStep: () => {
         dispatch({
