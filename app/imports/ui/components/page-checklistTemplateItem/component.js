@@ -373,7 +373,7 @@ class ChecklistTemplateItemPage extends React.Component {
                 root: classes.stepDescriptionTextField,
               }}
               autoFocus
-              placeholder="Placeholder"
+              placeholder="Empty step will be removed"
               value={textOfTheDescriptionOfTheStepBeingEdited}
               onChange={this.onChangeActivelyEditedStepDescription}
               onBlur={this.terminateEditModeForStep}
