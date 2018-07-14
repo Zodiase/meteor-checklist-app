@@ -72,6 +72,7 @@ class ChecklistTemplateItemPage extends React.Component {
     super(props);
 
     this.state = {
+      displayedChecklistName: '',
       // If true, the title should be editable.
       inTitleEditMode: true,
       // A copy of the loaded document for detecting changes.
@@ -127,6 +128,8 @@ class ChecklistTemplateItemPage extends React.Component {
     ) {
       moreState.copyOfTheLastErrorWhenCreatingNewStep = cloneDeep(props.errorWhenCreatingNewStep);
     }
+
+    moreState.displayedChecklistName = props.isChecklistDocumentLoaded && props.checklistDocument && (props.checklistDocument.name || voidChecklistName);
 
     return moreState;
   }
@@ -270,7 +273,83 @@ class ChecklistTemplateItemPage extends React.Component {
     });
   };
 
-  renderListItemForStep = (step) => {
+  renderAppbarContent = () => {
+    const {
+      classes,
+      isChecklistDocumentLoaded,
+      checklistDocument,
+      isNewlyCreatedChecklist,
+    } = this.props;
+    const {
+      displayedChecklistName,
+      inTitleEditMode,
+      isSavingChanges,
+    } = this.state;
+
+    return (
+      <Toolbar>
+        <AppBarBackButton
+          component={Link}
+          to="/checklist/index"
+        />
+
+        <Typography
+          variant="title"
+          color="inherit"
+          style={{
+            flex: 1,
+          }}
+        >
+          {isChecklistDocumentLoaded && checklistDocument && !inTitleEditMode && (
+            <Button
+              classes={{
+                root: classes.appBarTitleButton,
+              }}
+              onClick={this.onClickTitle}
+            >
+              {displayedChecklistName}
+            </Button>
+          )}
+          {isChecklistDocumentLoaded && checklistDocument && inTitleEditMode && (
+            <TextField
+              autoFocus={isNewlyCreatedChecklist}
+              placeholder={voidChecklistName}
+              value={checklistDocument.name}
+              onChange={this.onChangeChecklistName}
+              margin="none"
+              InputProps={{
+                classes: {
+                  root: classes['appBarTitleTextField.root'],
+                  underline: classes['appBarTitleTextField.underline'],
+                },
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <CircularProgress
+                      size={24}
+                      thickness={5}
+                      color="inherit"
+                      variant={isSavingChanges ? 'indeterminate' : 'determinate'}
+                      value={isSavingChanges ? 0 : 100}
+                      style={{
+                        transition: 'opacity 60ms ease-out 0.9s',
+                        opacity: isSavingChanges ? 1 : 0,
+                      }}
+                    />
+                  </InputAdornment>
+                ),
+              }}
+              fullWidth
+            />
+          )}
+          {!isChecklistDocumentLoaded && (
+            <span>Loading...</span>
+          )}
+        </Typography>
+      </Toolbar>
+    );
+  };
+
+  renderListItemContentForStep = (step) => {
     const {
       id,
       description,
@@ -317,20 +396,16 @@ class ChecklistTemplateItemPage extends React.Component {
       isLoadingChecklistDocument,
       isChecklistDocumentLoaded,
       checklistDocument,
-      isNewlyCreatedChecklist,
       isWaitingConfirmationOfNewStep,
       errorWhenCreatingNewStep,
     } = this.props;
     const {
-      inTitleEditMode,
+      displayedChecklistName,
       copyOfChecklistDocument,
       copyOfSteps,
-      isSavingChanges,
       textOfTheDescriptionOfTheNewStep,
       copyOfTheLastErrorWhenCreatingNewStep,
     } = this.state;
-
-    const displayedChecklistName = isChecklistDocumentLoaded && checklistDocument && (checklistDocument.name || voidChecklistName);
 
     return (
       <div ref={this.rootRef}>
@@ -349,65 +424,7 @@ class ChecklistTemplateItemPage extends React.Component {
         )}
 
         <AppBar position="static">
-          <Toolbar>
-            <AppBarBackButton
-              component={Link}
-              to="/checklist/index"
-            />
-
-            <Typography
-              variant="title"
-              color="inherit"
-              style={{
-                flex: 1,
-              }}
-            >
-              {isChecklistDocumentLoaded && checklistDocument && !inTitleEditMode && (
-                <Button
-                  classes={{
-                    root: classes.appBarTitleButton,
-                  }}
-                  onClick={this.onClickTitle}
-                >
-                  {displayedChecklistName}
-                </Button>
-              )}
-              {isChecklistDocumentLoaded && checklistDocument && inTitleEditMode && (
-                <TextField
-                  autoFocus={isNewlyCreatedChecklist}
-                  placeholder={voidChecklistName}
-                  value={checklistDocument.name}
-                  onChange={this.onChangeChecklistName}
-                  margin="none"
-                  InputProps={{
-                    classes: {
-                      root: classes['appBarTitleTextField.root'],
-                      underline: classes['appBarTitleTextField.underline'],
-                    },
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <CircularProgress
-                          size={24}
-                          thickness={5}
-                          color="inherit"
-                          variant={isSavingChanges ? 'indeterminate' : 'determinate'}
-                          value={isSavingChanges ? 0 : 100}
-                          style={{
-                            transition: 'opacity 60ms ease-out 0.9s',
-                            opacity: isSavingChanges ? 1 : 0,
-                          }}
-                        />
-                      </InputAdornment>
-                    ),
-                  }}
-                  fullWidth
-                />
-              )}
-              {!isChecklistDocumentLoaded && (
-                <span>Loading...</span>
-              )}
-            </Typography>
-          </Toolbar>
+          {this.renderAppbarContent()}
         </AppBar>
         <AppBarLoadingProgress
           show={isLoadingChecklistDocument}
@@ -440,7 +457,7 @@ class ChecklistTemplateItemPage extends React.Component {
                   <SortableHandle
                     className={classes.moveIndicator}
                   />
-                  {this.renderListItemForStep(step)}
+                  {this.renderListItemContentForStep(step)}
                 </SortableListItem>
               );
             })}
