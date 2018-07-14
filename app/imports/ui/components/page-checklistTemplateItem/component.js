@@ -10,6 +10,9 @@ import {
   Redirect,
   Link,
 } from 'react-router-dom';
+import {
+  arrayMove,
+} from 'react-sortable-hoc';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -71,8 +74,11 @@ class ChecklistTemplateItemPage extends React.Component {
     this.state = {
       // If true, the title should be editable.
       inTitleEditMode: true,
-      // If true, the document has been successfully loaded. This is used to detect if the document is deleted.
-      hasLoadedDocument: false,
+      // A copy of the loaded document for detecting changes.
+      // This is also used to detect if the document is deleted.
+      copyOfChecklistDocument: null,
+      // A copy of the steps for debouncing editing changes.
+      copyOfSteps: null,
       // If true, an update is in progress to save the changes.
       isSavingChanges: false,
       // Transitionary field for storing the description of the new step to be created.
@@ -89,16 +95,16 @@ class ChecklistTemplateItemPage extends React.Component {
   static getDerivedStateFromProps (props, state) {
     const moreState = {};
 
-    // The checklist is loaded for the first time.
+    // Update data copies.
     if (
       // Document loaded
       props.isChecklistDocumentLoaded
       // and is valid
       && props.checklistDocument
-      // Never loaded before.
-      && !state.hasLoadedDocument
+      && !isEqual(props.checklistDocument, state.copyOfChecklistDocument)
     ) {
-      moreState.hasLoadedDocument = true;
+      moreState.copyOfChecklistDocument = cloneDeep(props.checklistDocument);
+      moreState.copyOfSteps = cloneDeep(props.checklistDocument.steps);
     }
 
     // The checklist disappeared after loaded.
@@ -108,7 +114,7 @@ class ChecklistTemplateItemPage extends React.Component {
       // and is empty
       && !props.checklistDocument
       // and was loaded.
-      && state.hasLoadedDocument
+      && state.copyOfChecklistDocument
     ) {
       console.error('Unexpected Exception. Checklist was deleted externally.');
     }
@@ -196,6 +202,9 @@ class ChecklistTemplateItemPage extends React.Component {
     oldIndex,
     newIndex,
   }) => {
+    this.setState({
+      copyOfSteps: arrayMove(this.state.copyOfSteps, oldIndex, newIndex),
+    });
     this.props.reorderStep(oldIndex, newIndex);
   };
 
@@ -204,7 +213,6 @@ class ChecklistTemplateItemPage extends React.Component {
   };
 
   initiateEditModeForStep = (stepId) => {
-    console.log('initiateEditModeForStep');
     if (stepId === this.state.idOfStepBeingEdited) {
       return;
     }
@@ -225,6 +233,7 @@ class ChecklistTemplateItemPage extends React.Component {
     const {
       idOfStepBeingEdited: stepId,
       textOfTheDescriptionOfTheStepBeingEdited: newDescription,
+      copyOfSteps,
     } = this.state;
 
     if (!stepId) {
@@ -232,9 +241,22 @@ class ChecklistTemplateItemPage extends React.Component {
     }
 
     if (stepId) {
-      const step = this.props.checklistDocument.steps.find((someStep) => someStep.id === stepId);
+      const step = copyOfSteps.find((someStep) => someStep.id === stepId);
 
       if (step && step.description !== newDescription) {
+        const newCopyOfSteps = copyOfSteps.map((someStep) => (
+          someStep.id === stepId
+            ? {
+              ...someStep,
+              description: newDescription,
+            }
+            : someStep
+        ));
+
+        this.setState({
+          copyOfSteps: newCopyOfSteps,
+        });
+
         this.props.updateStepDescription(
           stepId,
           newDescription,
@@ -254,6 +276,9 @@ class ChecklistTemplateItemPage extends React.Component {
       description,
     } = step;
     const {
+      classes,
+    } = this.props;
+    const {
       idOfStepBeingEdited,
       textOfTheDescriptionOfTheStepBeingEdited,
     } = this.state;
@@ -265,6 +290,9 @@ class ChecklistTemplateItemPage extends React.Component {
         ? {
           primary: (
             <TextField
+              classes={{
+                root: classes.stepDescriptionTextField,
+              }}
               autoFocus
               placeholder="Placeholder"
               value={textOfTheDescriptionOfTheStepBeingEdited}
@@ -277,7 +305,7 @@ class ChecklistTemplateItemPage extends React.Component {
         }
         : {
           primary: description,
-          onClick: () => this.initiateEditModeForStep(id)
+          onClick: () => this.initiateEditModeForStep(id),
         })}
       />
     );
@@ -295,7 +323,8 @@ class ChecklistTemplateItemPage extends React.Component {
     } = this.props;
     const {
       inTitleEditMode,
-      hasLoadedDocument,
+      copyOfChecklistDocument,
+      copyOfSteps,
       isSavingChanges,
       textOfTheDescriptionOfTheNewStep,
       copyOfTheLastErrorWhenCreatingNewStep,
@@ -312,7 +341,7 @@ class ChecklistTemplateItemPage extends React.Component {
           )}
         </Helmet>
 
-        {isChecklistDocumentLoaded && !checklistDocument && !hasLoadedDocument && (
+        {isChecklistDocumentLoaded && !checklistDocument && !copyOfChecklistDocument && (
           <Redirect
             push
             to="/"
@@ -398,7 +427,7 @@ class ChecklistTemplateItemPage extends React.Component {
           >
             {isChecklistDocumentLoaded
             && checklistDocument
-            && checklistDocument.steps.map((step, index) => {
+            && copyOfSteps.map((step, index) => {
               const {
                 id,
               } = step;

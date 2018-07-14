@@ -56,7 +56,11 @@ const styles = (theme) => ({
     left: '8px',
     width: '3px',
     boxSizing: 'content-box',
-    opacity: 0.5,
+    opacity: 0.1,
+  },
+  stepDescriptionTextField: {
+    marginTop: '-4px',
+    marginBottom: '-4px',
   },
 });
 
