@@ -9,7 +9,7 @@ import {
 
 import {
   getAction,
-} from '/imports/ui/redux-store';
+} from '/imports/ui/reduxStore';
 
 import {
   createNew as createNewChecklist,
@@ -76,17 +76,17 @@ export default connect(
   (dispatch/* , ownProps */) => ({
     enterEditMode: () => {
       dispatch({
-        type: getAction('ui.checklist.listEditMode.enter').type,
+        type: getAction('ui.checklistTemplate.index.editMode.enter').type,
       });
     },
     exitEditMode: () => {
       dispatch({
-        type: getAction('ui.checklist.listEditMode.exit').type,
+        type: getAction('ui.checklistTemplate.index.editMode.exit').type,
       });
     },
     toggleItemSelectionInEditMode: (itemIds) => {
       dispatch({
-        type: getAction('ui.checklist.listEditMode.toggleItemSelection').type,
+        type: getAction('ui.checklistTemplate.index.editMode.toggleItemSelection').type,
         itemIds,
       });
     },
@@ -94,7 +94,7 @@ export default connect(
       const newChecklist = {};
 
       dispatch({
-        type: getAction('ui.checklist.createNewChecklist.markStart').type,
+        type: getAction('ui.checklistTemplate.index.createNewChecklist.markStart').type,
         newChecklist,
       });
 
@@ -102,7 +102,7 @@ export default connect(
         newChecklist,
       }, (error, response) => {
         dispatch({
-          type: getAction('ui.checklist.createNewChecklist.handleResponse').type,
+          type: getAction('ui.checklistTemplate.index.createNewChecklist.handleResponse').type,
           newChecklist,
           error,
           response,
@@ -118,10 +118,10 @@ export default connect(
     },
     subscribeChecklists: () => {
       dispatch({
-        type: getAction('data.checklists.subscribe').type,
+        type: getAction('data.checklistTemplate.index.subscribe').type,
         onListUpdate: (list) => {
           defer(() => dispatch({
-            type: getAction('data.checklists.update').type,
+            type: getAction('data.checklistTemplate.index.updateLocalCopy').type,
             list,
           }));
         },
@@ -129,7 +129,7 @@ export default connect(
     },
     stopSubscriptionOfChecklists: () => {
       dispatch({
-        type: getAction('data.checklists.terminateSubscription').type,
+        type: getAction('data.checklistTemplate.index.terminateSubscription').type,
       });
     },
   }),

@@ -1,2 +1,3 @@
-import '/imports/ui/actions/common.js';
-import '/imports/ui/actions/checklist.js';
+import '/imports/ui/actions/common';
+import '/imports/ui/actions/checklistTemplate.data';
+import '/imports/ui/actions/checklistTemplate.ui';

@@ -6,7 +6,7 @@ import BackIcon from '@material-ui/icons/KeyboardArrowLeft';
 
 import {
   appBarBackButton,
-} from '/imports/ui/common-style';
+} from '/imports/ui/commonStyle';
 
 class AppBarBackButton extends React.PureComponent {
   render () {

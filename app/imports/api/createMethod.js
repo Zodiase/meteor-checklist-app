@@ -15,7 +15,7 @@ import {
 } from '/imports/consts.shared';
 import {
   registerLegends,
-} from '/imports/log-icon-legend';
+} from '/imports/logIconLegends';
 
 registerLegends({
   'method call mark': callMark,

@@ -32,7 +32,7 @@ import {
 } from '/imports/consts.server';
 import {
   printLegends,
-} from '/imports/log-icon-legend';
+} from '/imports/logIconLegends';
 import App from '/imports/ui/App';
 import {
   initializingReduxStoreForRouteSsr,
@@ -40,7 +40,7 @@ import {
 import {
   createStore,
   rootReducer,
-} from '/imports/ui/redux-store';
+} from '/imports/ui/reduxStore';
 import '/imports/api/checklists/publications';
 import './sentry';
 

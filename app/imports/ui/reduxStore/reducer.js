@@ -1,4 +1,4 @@
-import initialState from './initial-state';
+import initialState from './initialState';
 import {
   actionSpecificReducer,
 } from './actions';

@@ -23,7 +23,7 @@ import {
   createStore,
   setGlobalStore,
   rootReducer,
-} from '/imports/ui/redux-store';
+} from '/imports/ui/reduxStore';
 import './sentry';
 
 const baseUrl = objectPath.get(Meteor.settings, 'public.baseUrl', '/');

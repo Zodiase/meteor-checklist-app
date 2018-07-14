@@ -9,7 +9,7 @@ import {
 
 import {
   getAction,
-} from '/imports/ui/redux-store';
+} from '/imports/ui/reduxStore';
 
 import {
   updateName as updateNameOfChecklist,
@@ -91,17 +91,17 @@ export default connect(
     return {
       markNewlyCreatedChecklistAsOpen: () => {
         dispatch({
-          type: getAction('ui.checklist.markNewlyCreatedChecklistAsOpen').type,
+          type: getAction('ui.checklistTemplate.index.createNewChecklist.openedTheNewOne').type,
           idOfChecklist,
         });
       },
       subscribeChecklist: () => {
         dispatch({
-          type: getAction('data.checklists.document.subscribe').type,
+          type: getAction('data.checklistTemplate.document.subscribe').type,
           idOfChecklist,
           onDocumentUpdate: (document) => {
             defer(() => dispatch({
-              type: getAction('data.checklists.document.updateLocal').type,
+              type: getAction('data.checklistTemplate.document.updateLocalCopy').type,
               idOfChecklist,
               document,
             }));
@@ -110,7 +110,7 @@ export default connect(
       },
       stopSubscriptionOfChecklist: () => {
         dispatch({
-          type: getAction('data.checklists.document.terminateSubscription').type,
+          type: getAction('data.checklistTemplate.document.terminateSubscription').type,
           idOfChecklist,
         });
       },
@@ -126,7 +126,7 @@ export default connect(
       },
       addStepToChecklist: (stepObj) => {
         dispatch({
-          type: getAction('ui.checklist.startWaitingConfirmationOfNewStep').type,
+          type: getAction('ui.checklistTemplate.document.createNewStep.startWaitingConfirmation').type,
         });
 
         addStepToChecklist.call({
@@ -136,7 +136,7 @@ export default connect(
           },
         }, (error, response) => {
           dispatch({
-            type: getAction('ui.checklist.handleResponseFromCreatingNewStep').type,
+            type: getAction('ui.checklistTemplate.document.createNewStep.handleResponse').type,
             idOfChecklist,
             step: stepObj,
             error,
@@ -177,7 +177,7 @@ export default connect(
       },
       acknowledgeErrorWhenCreatingNewStep: () => {
         dispatch({
-          type: getAction('ui.checklist.acknowledgeErrorWhenCreatingNewStep').type,
+          type: getAction('ui.checklistTemplate.document.createNewStep.acknowledgeError').type,
         });
       },
     };

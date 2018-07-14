@@ -6,19 +6,11 @@ import {
   Tracker,
 } from 'meteor/tracker';
 
-import handleStorage from '/imports/handle-storage';
+import handleStorage from '/imports/handleStorage';
 import {
-  getAction,
   registerAction,
-  actionSpecificReducer,
-} from '/imports/ui/redux-store';
+} from '/imports/ui/reduxStore';
 import Checklists from '/imports/api/checklists/collections';
-import {
-  createNew as createNewChecklist,
-} from '/imports/api/checklists/methods';
-import {
-  ClientSideCreationSchema,
-} from '/imports/api/checklists/schema';
 import {
   sortByCreateDate,
 } from '/imports/api/checklists/consts';
@@ -37,7 +29,7 @@ const wrapJsonFriendlyChecklistDocument = (originalDoc) => {
 };
 
 registerAction({
-  type: 'data.checklists.subscribe',
+  type: 'data.checklistTemplate.index.subscribe',
   schema: {
     onListUpdate: Function,
   },
@@ -82,7 +74,7 @@ registerAction({
 });
 
 registerAction({
-  type: 'data.checklists.terminateSubscription',
+  type: 'data.checklistTemplate.index.terminateSubscription',
   reducer: (state) => {
     const handleOfSubscription = handleStorage.withdraw(state['data.checklists.handleIdOfSubscription']);
 
@@ -103,7 +95,7 @@ registerAction({
 });
 
 registerAction({
-  type: 'data.checklists.update',
+  type: 'data.checklistTemplate.index.updateLocalCopy',
   schema: {
     list: {
       type: Array,
@@ -127,26 +119,7 @@ registerAction({
 });
 
 registerAction({
-  type: 'data.checklists.createNew',
-  schema: {
-    checklist: ClientSideCreationSchema,
-    onReady: Function,
-    onError: Function,
-  },
-  reducer: (state, {
-    checklist,
-    onReady,
-    onError,
-  }) => {
-    createNewChecklist.callPromise(checklist)
-      .then(onReady, onError);
-
-    return state;
-  },
-});
-
-registerAction({
-  type: 'data.checklists.document.subscribe',
+  type: 'data.checklistTemplate.document.subscribe',
   schema: {
     idOfChecklist: String,
     onDocumentUpdate: Function,
@@ -223,7 +196,7 @@ registerAction({
 });
 
 registerAction({
-  type: 'data.checklists.document.terminateSubscription',
+  type: 'data.checklistTemplate.document.terminateSubscription',
   schema: {
     idOfChecklist: String,
   },
@@ -270,7 +243,7 @@ registerAction({
 });
 
 registerAction({
-  type: 'data.checklists.document.updateLocal',
+  type: 'data.checklistTemplate.document.updateLocalCopy',
   schema: {
     idOfChecklist: String,
     document: {
@@ -314,7 +287,7 @@ registerAction({
 });
 
 registerAction({
-  type: 'data.checklists.document.loadFromSsr',
+  type: 'data.checklistTemplate.document.updateLocalCopy--ssr',
   schema: {
     idOfChecklist: String,
     document: {
@@ -341,237 +314,6 @@ registerAction({
         lastUpdated: Date.now(),
         source: wrapJsonFriendlyChecklistDocument(document),
       },
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.listEditMode.enter',
-  reducer: (state) => {
-    return {
-      ...state,
-
-      'ui.checklist.list.inEditMode': true,
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.listEditMode.exit',
-  reducer: (state) => {
-    return {
-      ...state,
-
-      'ui.checklist.list.inEditMode': false,
-      'ui.checklist.list.editMode.selection': null,
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.listEditMode.toggleItemSelection',
-  schema: {
-    itemIds: [String],
-  },
-  reducer: (state, {
-    itemIds,
-  }) => {
-    const selection = objectPath.get(state, ['ui.checklist.list.editMode.selection'], {});
-
-    const newSelection = itemIds.reduce((acc, itemId) => {
-      const isItemSelected = objectPath.get(selection, [itemId], false);
-
-      return {
-        ...acc,
-        [itemId]: !isItemSelected,
-      };
-    }, selection);
-
-    return {
-      ...state,
-
-      'ui.checklist.list.editMode.selection': newSelection,
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.createNew',
-  schema: {
-    onReady: Function,
-    onError: Function,
-  },
-  reducer: (state, {
-    onReady,
-    onError,
-  }) => {
-    return {
-      ...actionSpecificReducer(state, {
-        type: getAction('data.checklists.createNew').type,
-        checklist: {
-          name: '',
-          steps: [],
-        },
-        onReady,
-        onError,
-      }),
-
-      'ui.checklist.creatingNewChecklist': true,
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.createNewChecklist.markStart',
-  schema: {
-    newChecklist: ClientSideCreationSchema,
-  },
-  reducer: (state) => {
-    return {
-      ...state,
-
-      'ui.checklist.creatingNewChecklist': true,
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.createNewChecklist.handleResponse',
-  schema: {
-    newChecklist: ClientSideCreationSchema,
-    error: {
-      type: Error,
-      blackbox: true,
-      optional: true,
-    },
-    response: {
-      type: Object,
-      blackbox: true,
-      optional: true,
-    },
-  },
-  reducer: (state, {
-    error,
-    response,
-  }) => {
-    if (error) {
-      return {
-        ...state,
-
-        'ui.checklist.creatingNewChecklist': false,
-        'ui.checklist.errorWhenCreatingNewChecklist': {
-          name: error.name,
-          message: error.message,
-        },
-      };
-    }
-
-    return {
-      ...state,
-
-      'ui.checklist.creatingNewChecklist': false,
-      'ui.checklist.idOfNewlyCreatedChecklist': response._id,
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.markNewlyCreatedChecklistAsOpen',
-  schema: {
-    idOfChecklist: String,
-  },
-  reducer: (state, {
-    idOfChecklist,
-  }) => {
-    if (idOfChecklist && idOfChecklist !== state['ui.checklist.idOfNewlyCreatedChecklist']) {
-      return state;
-    }
-
-    return {
-      ...state,
-
-      'ui.checklist.creatingNewChecklist': false,
-      'ui.checklist.idOfNewlyCreatedChecklist': null,
-      'ui.checklist.errorWhenCreatingNewChecklist': null,
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.startWaitingConfirmationOfNewStep',
-  reducer: (state) => {
-    return {
-      ...state,
-
-      'ui.checklist.waitingConfirmationOfNewStep': true,
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.handleResponseFromCreatingNewStep',
-  schema: {
-    idOfChecklist: String,
-    step: {
-      type: Object,
-      blackbox: true,
-    },
-    error: {
-      type: Error,
-      blackbox: true,
-      optional: true,
-    },
-    response: {
-      type: Object,
-      blackbox: true,
-      optional: true,
-    },
-  },
-  reducer: (state, {
-    error,
-    response,
-  }) => {
-    if (error) {
-      const uiError = {
-        name: 'unknown',
-        message: 'Unexpected error',
-      };
-
-      if (error.error === 'validation-error' && error.details && error.details.length > 0) {
-        uiError.name = 'ValidationError';
-        uiError.message = error.details[0].message;
-      }
-
-      if (uiError.name === 'unknown') {
-        console.error('Unexpected error when creating new step', error);
-      }
-
-      return {
-        ...state,
-
-        'ui.checklist.waitingConfirmationOfNewStep': false,
-        'ui.checklist.errorWhenCreatingNewStep': uiError,
-      };
-    }
-
-    console.warn('handle response', response);
-
-    return {
-      ...state,
-
-      'ui.checklist.waitingConfirmationOfNewStep': false,
-      'ui.checklist.errorWhenCreatingNewStep': null,
-    };
-  },
-});
-
-registerAction({
-  type: 'ui.checklist.acknowledgeErrorWhenCreatingNewStep',
-  reducer: (state) => {
-    return {
-      ...state,
-
-      'ui.checklist.errorWhenCreatingNewStep': null,
     };
   },
 });

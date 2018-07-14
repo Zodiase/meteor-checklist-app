@@ -1,8 +1,6 @@
 import {
-  store as globalStateStore,
-  getAction,
   registerAction,
-} from '/imports/ui/redux-store';
+} from '/imports/ui/reduxStore';
 
 registerAction({
   type: 'asyncTask.register',

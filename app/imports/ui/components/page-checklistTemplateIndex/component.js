@@ -25,12 +25,12 @@ import {
   voidChecklistName,
 } from '/imports/ui/consts';
 
-import AppBarBackButton from '/imports/ui/components/appbar-back-button';
-import AppBarLoadingProgress from '/imports/ui/components/appbar-loading-progress';
-import FullScreenSpinner from '/imports/ui/components/full-screen-spinner';
+import AppBarBackButton from '/imports/ui/components/appbar__backButton';
+import AppBarLoadingProgress from '/imports/ui/components/appbar__LoadingProgress';
+import FullScreenSpinner from '/imports/ui/components/fullScreenSpinner';
 
 export default
-class ChecklistIndexPage extends React.Component {
+class ChecklistTemplateIndexPage extends React.Component {
   static propTypes = {
     isChecklistListDataLoading: PropTypes.bool.isRequired,
     isChecklistListDataReady: PropTypes.bool.isRequired,

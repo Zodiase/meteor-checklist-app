@@ -8,19 +8,19 @@ import {
   matchPath,
 } from 'react-router-dom';
 import Head from '/imports/ui/components/head';
-import ChecklistIndexPage from '/imports/ui/components/page-checklist-index';
-import ChecklistItemPage from '/imports/ui/components/page-checklist-item';
+import ChecklistTemplateIndexPage from '/imports/ui/components/page-checklistTemplateIndex';
+import ChecklistTemplateItemPage from '/imports/ui/components/page-checklistTemplateItem';
 import {
   getAllForIndex as getAllChecklists,
   findById as findChecklistById,
 } from '/imports/api/checklists/methods';
 import {
   getAction,
-} from '/imports/ui/redux-store';
+} from '/imports/ui/reduxStore';
 
 const switchRouteConfigs = [
   {
-    name: 'home-page',
+    name: 'homePage',
     routeProps: {
       exact: true,
       path: '/',
@@ -28,55 +28,50 @@ const switchRouteConfigs = [
     },
   },
   {
-    name: 'checklist-index-page',
+    name: 'checklistTemplateIndexPage',
     routeProps: {
       exact: true,
       path: '/checklist/index',
-      component: ChecklistIndexPage,
+      component: ChecklistTemplateIndexPage,
     },
     initializingData: async (dispatch/* , props */) => {
       const checklists = await getAllChecklists.callPromise();
 
       dispatch({
-        type: getAction('data.checklists.update').type,
+        type: getAction('data.checklistTemplate.index.updateLocalCopy').type,
         list: checklists,
       });
     },
   },
   {
-    name: 'checklist-item-page',
+    name: 'checklistTemplateItemPage',
     routeProps: {
       exact: true,
       path: '/checklist/item/:id',
-      component: ChecklistItemPage,
+      component: ChecklistTemplateItemPage,
     },
     initializingData: async (dispatch, props) => {
       const idOfChecklist = objectPath.get(props, 'match.params.id');
 
-      const checklist = idOfChecklist && await findChecklistById.callPromise({
+      let checklist = idOfChecklist && await findChecklistById.callPromise({
         id: idOfChecklist,
       });
 
       if (!checklist) {
-        console.error(`Checklist 404: ${idOfChecklist}`);
         // 404.
-        dispatch({
-          type: getAction('data.checklists.document.loadFromSsr').type,
-          idOfChecklist,
-          document: null,
-        });
-        return;
+        console.error(`Checklist 404: ${idOfChecklist}`);
+        checklist = null;
       }
 
       dispatch({
-        type: getAction('data.checklists.document.loadFromSsr').type,
+        type: getAction('data.checklistTemplate.document.updateLocalCopy--ssr').type,
         idOfChecklist,
         document: checklist,
       });
     },
   },
   {
-    name: '404-page',
+    name: '404Page',
     routeProps: {
       component: () => <Link to="/">404</Link>,
     },

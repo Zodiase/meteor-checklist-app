@@ -1,6 +1,6 @@
 import uuid from 'uuid/v4';
 
-import createMethod from '../create-method';
+import createMethod from '../createMethod';
 
 import Checklists from './';
 import {

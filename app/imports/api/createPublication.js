@@ -9,7 +9,7 @@ import {
 } from '/imports/consts.server';
 import {
   registerLegends,
-} from '/imports/log-icon-legend';
+} from '/imports/logIconLegends';
 
 registerLegends({
   'publication mark': publicationMark,

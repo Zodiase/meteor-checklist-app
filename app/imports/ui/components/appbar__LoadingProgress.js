@@ -6,7 +6,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 
 import {
   appBarLoadingProgress,
-} from '/imports/ui/common-style';
+} from '/imports/ui/commonStyle';
 
 class AppBarLoadingProgress extends React.PureComponent {
   static propTypes = {

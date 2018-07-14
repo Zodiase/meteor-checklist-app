@@ -2,7 +2,7 @@ import SimpleSchema from 'simpl-schema';
 
 import {
   createAndModifyDates,
-} from '../common-schema-fields';
+} from '../commonSchemaFields';
 
 export
 const ClientSideCreationStepSchema = new SimpleSchema({

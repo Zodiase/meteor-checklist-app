@@ -27,14 +27,14 @@ import {
   voidChecklistName,
 } from '/imports/ui/consts';
 
-import AppBarBackButton from '/imports/ui/components/appbar-back-button';
-import AppBarLoadingProgress from '/imports/ui/components/appbar-loading-progress';
+import AppBarBackButton from '/imports/ui/components/appbar__backButton';
+import AppBarLoadingProgress from '/imports/ui/components/appbar__LoadingProgress';
 import SortableList from '/imports/ui/components/SortableList';
 import SortableListItem from '/imports/ui/components/SortableListItem';
 import SortableHandle from '/imports/ui/components/SortableHandle';
 
 export default
-class ChecklistItemPage extends React.Component {
+class ChecklistTemplateItemPage extends React.Component {
   static propTypes = {
     idOfChecklist: PropTypes.string.isRequired,
     isLoadingChecklistDocument: PropTypes.bool.isRequired,
