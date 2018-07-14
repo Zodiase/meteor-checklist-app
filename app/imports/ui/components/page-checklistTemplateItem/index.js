@@ -23,6 +23,7 @@ import Component from './component';
 
 const styles = (theme) => ({
   appBarTitleButton: {
+    justifyContent: 'flex-start',
     textTransform: 'none',
     font: 'inherit',
     color: 'inherit',
@@ -40,7 +41,7 @@ const styles = (theme) => ({
       borderBottomColor: 'white',
     },
     '&:before': {
-      borderBottomColor: 'transparent',
+      borderBottomColor: 'rgba(255, 255, 255, 0.5)',
     },
     '&:hover:not($disabled):not($focused):not($error):before': {
       borderBottomColor: 'rgba(255, 255, 255, 0.5)',
