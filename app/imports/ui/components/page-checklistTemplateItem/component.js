@@ -89,8 +89,6 @@ class ChecklistTemplateItemPage extends React.Component {
       idOfStepBeingEdited: '',
       textOfTheDescriptionOfTheStepBeingEdited: '',
     };
-
-    this.rootRef = React.createRef();
   }
 
   static getDerivedStateFromProps (props, state) {
@@ -273,9 +271,30 @@ class ChecklistTemplateItemPage extends React.Component {
     });
   };
 
-  renderAppbarContent = () => {
+  renderRedirects () {
+    const {
+      isChecklistDocumentLoaded,
+      checklistDocument,
+    } = this.props;
+    const {
+      copyOfChecklistDocument,
+    } = this.state;
+
+    return isChecklistDocumentLoaded
+    && !checklistDocument
+    && !copyOfChecklistDocument
+    && (
+      <Redirect
+        push
+        to="/"
+      />
+    );
+  }
+
+  renderAppBar () {
     const {
       classes,
+      isLoadingChecklistDocument,
       isChecklistDocumentLoaded,
       checklistDocument,
       isNewlyCreatedChecklist,
@@ -287,69 +306,166 @@ class ChecklistTemplateItemPage extends React.Component {
     } = this.state;
 
     return (
-      <Toolbar>
-        <AppBarBackButton
-          component={Link}
-          to="/checklist/index"
-        />
-
-        <Typography
-          variant="title"
-          color="inherit"
-          style={{
-            flex: 1,
-          }}
-        >
-          {isChecklistDocumentLoaded && checklistDocument && !inTitleEditMode && (
-            <Button
-              classes={{
-                root: classes.appBarTitleButton,
-              }}
-              onClick={this.onClickTitle}
-            >
-              {displayedChecklistName}
-            </Button>
+      <React.Fragment>
+        <Helmet>
+          <title>Loading...</title>
+          {isChecklistDocumentLoaded && checklistDocument && (
+            <title>{displayedChecklistName}</title>
           )}
-          {isChecklistDocumentLoaded && checklistDocument && inTitleEditMode && (
+        </Helmet>
+
+        <AppBar position="static">
+          <Toolbar>
+            <AppBarBackButton
+              component={Link}
+              to="/checklist/index"
+            />
+
+            <Typography
+              variant="title"
+              color="inherit"
+              style={{
+                flex: 1,
+              }}
+            >
+              {isChecklistDocumentLoaded && checklistDocument && !inTitleEditMode && (
+                <Button
+                  classes={{
+                    root: classes.appBarTitleButton,
+                  }}
+                  onClick={this.onClickTitle}
+                >
+                  {displayedChecklistName}
+                </Button>
+              )}
+              {isChecklistDocumentLoaded && checklistDocument && inTitleEditMode && (
+                <TextField
+                  autoFocus={isNewlyCreatedChecklist}
+                  placeholder={voidChecklistName}
+                  value={checklistDocument.name}
+                  onChange={this.onChangeChecklistName}
+                  margin="none"
+                  InputProps={{
+                    classes: {
+                      root: classes['appBarTitleTextField.root'],
+                      underline: classes['appBarTitleTextField.underline'],
+                    },
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <CircularProgress
+                          size={24}
+                          thickness={5}
+                          color="inherit"
+                          variant={isSavingChanges ? 'indeterminate' : 'determinate'}
+                          value={isSavingChanges ? 0 : 100}
+                          style={{
+                            transition: 'opacity 60ms ease-out 0.9s',
+                            opacity: isSavingChanges ? 1 : 0,
+                          }}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
+                  fullWidth
+                />
+              )}
+              {!isChecklistDocumentLoaded && (
+                <span>Loading...</span>
+              )}
+            </Typography>
+          </Toolbar>
+        </AppBar>
+
+        <AppBarLoadingProgress
+          show={isLoadingChecklistDocument}
+        />
+      </React.Fragment>
+    );
+  }
+
+  renderStepList () {
+    const {
+      classes,
+      isChecklistDocumentLoaded,
+      checklistDocument,
+      isWaitingConfirmationOfNewStep,
+    } = this.props;
+    const {
+      copyOfSteps,
+      textOfTheDescriptionOfTheNewStep,
+    } = this.state;
+
+    return (
+      <SortableList
+        // pressDelay={200}
+        axis="y"
+        lockAxis="y"
+        lockToContainerEdges
+        lockOffset="0%"
+        useDragHandle
+        onSortEnd={this.onSortStepEnd}
+      >
+        <form
+          onSubmit={this.onSubmitEditsForStep}
+        >
+          {isChecklistDocumentLoaded
+          && checklistDocument
+          && copyOfSteps.map((step, index) => {
+            const {
+              id,
+            } = step;
+
+            return (
+              <SortableListItem
+                key={id}
+                index={index}
+              >
+                <SortableHandle
+                  className={classes.moveIndicator}
+                />
+                {this.renderListItemContentForStep(step)}
+              </SortableListItem>
+            );
+          })}
+        </form>
+
+        <form
+          // The form element is outside of the list so it doesn't interfere the flexbox layout.
+          onSubmit={this.onSubmitNewStep}
+        >
+          <ListItem>
+            <ListItemIcon>
+              <AddIcon />
+            </ListItemIcon>
+
             <TextField
-              autoFocus={isNewlyCreatedChecklist}
-              placeholder={voidChecklistName}
-              value={checklistDocument.name}
-              onChange={this.onChangeChecklistName}
+              disabled={isWaitingConfirmationOfNewStep}
+              placeholder="New step"
+              value={textOfTheDescriptionOfTheNewStep}
+              onChange={this.onChangeDescriptionOfNewStep}
               margin="none"
+              fullWidth
               InputProps={{
-                classes: {
-                  root: classes['appBarTitleTextField.root'],
-                  underline: classes['appBarTitleTextField.underline'],
-                },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <CircularProgress
-                      size={24}
-                      thickness={5}
-                      color="inherit"
-                      variant={isSavingChanges ? 'indeterminate' : 'determinate'}
-                      value={isSavingChanges ? 0 : 100}
-                      style={{
-                        transition: 'opacity 60ms ease-out 0.9s',
-                        opacity: isSavingChanges ? 1 : 0,
-                      }}
-                    />
+                    <Button
+                      disabled={isWaitingConfirmationOfNewStep}
+                      size="small"
+                      type="submit"
+                    >
+                      Create
+                    </Button>
                   </InputAdornment>
                 ),
               }}
-              fullWidth
             />
-          )}
-          {!isChecklistDocumentLoaded && (
-            <span>Loading...</span>
-          )}
-        </Typography>
-      </Toolbar>
+          </ListItem>
+        </form>
+      </SortableList>
     );
-  };
+  }
 
-  renderListItemContentForStep = (step) => {
+  renderListItemContentForStep (step) {
     const {
       id,
       description,
@@ -388,146 +504,61 @@ class ChecklistTemplateItemPage extends React.Component {
         })}
       />
     );
-  };
+  }
 
-  render () {
+  renderModals () {
     const {
-      classes,
-      isLoadingChecklistDocument,
-      isChecklistDocumentLoaded,
-      checklistDocument,
-      isWaitingConfirmationOfNewStep,
       errorWhenCreatingNewStep,
     } = this.props;
     const {
-      displayedChecklistName,
-      copyOfChecklistDocument,
-      copyOfSteps,
-      textOfTheDescriptionOfTheNewStep,
       copyOfTheLastErrorWhenCreatingNewStep,
     } = this.state;
 
     return (
-      <div ref={this.rootRef}>
-        <Helmet>
-          <title>Loading...</title>
-          {isChecklistDocumentLoaded && checklistDocument && (
-            <title>{displayedChecklistName}</title>
-          )}
-        </Helmet>
-
-        {isChecklistDocumentLoaded && !checklistDocument && !copyOfChecklistDocument && (
-          <Redirect
-            push
-            to="/"
-          />
+      <Snackbar
+        key="error-of-creating-new-step"
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        open={errorWhenCreatingNewStep !== null}
+        onClose={this.onAcknowledgeErrorWhenCreatingNewStep}
+        ContentProps={{
+          'aria-describedby': 'error-when-creating-new-step',
+        }}
+        message={(
+          <span id="error-when-creating-new-step">
+            {objectPath.get(copyOfTheLastErrorWhenCreatingNewStep, 'message')}
+          </span>
         )}
-
-        <AppBar position="static">
-          {this.renderAppbarContent()}
-        </AppBar>
-        <AppBarLoadingProgress
-          show={isLoadingChecklistDocument}
-        />
-
-        <SortableList
-          // pressDelay={200}
-          axis="y"
-          lockAxis="y"
-          lockToContainerEdges
-          lockOffset="0%"
-          useDragHandle
-          onSortEnd={this.onSortStepEnd}
-        >
-          <form
-            onSubmit={this.onSubmitEditsForStep}
+        action={[
+          <Button
+            key="confirm"
+            color="inherit"
+            size="small"
+            onClick={this.onAcknowledgeErrorWhenCreatingNewStep}
           >
-            {isChecklistDocumentLoaded
-            && checklistDocument
-            && copyOfSteps.map((step, index) => {
-              const {
-                id,
-              } = step;
+            OK
+          </Button>,
+        ]}
+      />
+    );
+  }
 
-              return (
-                <SortableListItem
-                  key={id}
-                  index={index}
-                >
-                  <SortableHandle
-                    className={classes.moveIndicator}
-                  />
-                  {this.renderListItemContentForStep(step)}
-                </SortableListItem>
-              );
-            })}
-          </form>
+  render () {
 
-          <form
-            // The form element is outside of the list so it doesn't interfere the flexbox layout.
-            onSubmit={this.onSubmitNewStep}
-          >
-            <ListItem>
-              <ListItemIcon>
-                <AddIcon />
-              </ListItemIcon>
+    return (
+      <React.Fragment>
+        {this.renderRedirects()}
 
-              <TextField
-                disabled={isWaitingConfirmationOfNewStep}
-                placeholder="New step"
-                value={textOfTheDescriptionOfTheNewStep}
-                onChange={this.onChangeDescriptionOfNewStep}
-                margin="none"
-                fullWidth
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Button
-                        disabled={isWaitingConfirmationOfNewStep}
-                        size="small"
-                        type="submit"
-                      >
-                        Create
-                      </Button>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </ListItem>
-          </form>
-        </SortableList>
+        {this.renderAppBar()}
 
-        <pre>{JSON.stringify(checklistDocument, null, 2)}</pre>
+        {this.renderStepList()}
 
-        <Snackbar
-          key="error-of-creating-new-step"
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
-          }}
-          open={errorWhenCreatingNewStep !== null}
-          onClose={this.onAcknowledgeErrorWhenCreatingNewStep}
-          ContentProps={{
-            'aria-describedby': 'error-when-creating-new-step',
-          }}
-          message={(
-            <span id="error-when-creating-new-step">
-              {objectPath.get(copyOfTheLastErrorWhenCreatingNewStep, 'message')}
-            </span>
-          )}
-          action={[
-            <Button
-              key="confirm"
-              color="inherit"
-              size="small"
-              onClick={this.onAcknowledgeErrorWhenCreatingNewStep}
-            >
-              OK
-            </Button>,
-          ]}
-        />
+        <pre>{JSON.stringify(this.props.checklistDocument, null, 2)}</pre>
 
-      </div>
+        {this.renderModals()}
+      </React.Fragment>
     );
   }
 }
