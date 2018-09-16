@@ -60,6 +60,10 @@ export default connect(
       )
       : [];
 
+    const getUriPathToChecklistTemplateItem = (id) => {
+      return `/checklist/item/${id}`;
+    };
+
     return {
       isChecklistListDataLoading,
       isChecklistListDataReady,
@@ -70,6 +74,7 @@ export default connect(
       listOfSelectedItemsInEditMode,
 
       isItemSelectedInEditMode,
+      getUriPathToChecklistTemplateItem,
     };
   },
   // mapDispatchToProps

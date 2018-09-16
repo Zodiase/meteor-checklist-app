@@ -52,6 +52,7 @@ class ChecklistTemplateIndexPage extends React.Component {
     exitEditMode: PropTypes.func.isRequired,
     toggleItemSelectionInEditMode: PropTypes.func.isRequired,
     isItemSelectedInEditMode: PropTypes.func.isRequired,
+    getUriPathToChecklistTemplateItem: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -233,6 +234,7 @@ class ChecklistTemplateIndexPage extends React.Component {
   renderRedirects () {
     const {
       idOfNewlyCreatedChecklist,
+      getUriPathToChecklistTemplateItem,
     } = this.props;
 
     return (
@@ -240,7 +242,7 @@ class ChecklistTemplateIndexPage extends React.Component {
         {idOfNewlyCreatedChecklist && (
           <Redirect
             push
-            to={`/checklist/item/${idOfNewlyCreatedChecklist}`}
+            to={getUriPathToChecklistTemplateItem(idOfNewlyCreatedChecklist)}
           />
         )}
       </React.Fragment>
@@ -269,6 +271,7 @@ class ChecklistTemplateIndexPage extends React.Component {
       isInEditMode,
 
       isItemSelectedInEditMode,
+      getUriPathToChecklistTemplateItem,
     } = this.props;
 
     return (
@@ -291,7 +294,7 @@ class ChecklistTemplateIndexPage extends React.Component {
                 })}
                 {...(!isInEditMode && {
                   component: Link,
-                  to: `/checklist/item/${_id}`,
+                  to: getUriPathToChecklistTemplateItem(_id),
                 })}
               >
                 {isInEditMode && (
