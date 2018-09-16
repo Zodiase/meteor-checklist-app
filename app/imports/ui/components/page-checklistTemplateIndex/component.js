@@ -32,22 +32,22 @@ import FullScreenSpinner from '/imports/ui/components/fullScreenSpinner';
 export default
 class ChecklistTemplateIndexPage extends React.Component {
   static propTypes = {
-    isChecklistListDataLoading: PropTypes.bool.isRequired,
-    isChecklistListDataReady: PropTypes.bool.isRequired,
-    listOfChecklists: PropTypes.arrayOf(PropTypes.shape({
+    isChecklistTemplateListDataLoading: PropTypes.bool.isRequired,
+    isChecklistTemplateListDataReady: PropTypes.bool.isRequired,
+    listOfChecklistTemplates: PropTypes.arrayOf(PropTypes.shape({
       _id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       stepCount: PropTypes.number.isRequired,
     })),
     isInEditMode: PropTypes.bool.isRequired,
-    isCreatingNewChecklist: PropTypes.bool.isRequired,
-    idOfNewlyCreatedChecklist: PropTypes.string,
+    isCreatingNewChecklistTemplate: PropTypes.bool.isRequired,
+    idOfNewlyCreatedChecklistTemplate: PropTypes.string,
     listOfSelectedItemsInEditMode: PropTypes.arrayOf(PropTypes.string),
 
-    requestToCreateNewChecklist: PropTypes.func.isRequired,
-    requestToRemoveChecklists: PropTypes.func.isRequired,
-    subscribeChecklists: PropTypes.func.isRequired,
-    stopSubscriptionOfChecklists: PropTypes.func.isRequired,
+    requestToCreateNewChecklistTemplate: PropTypes.func.isRequired,
+    requestToRemoveChecklistTemplates: PropTypes.func.isRequired,
+    subscribeChecklistTemplates: PropTypes.func.isRequired,
+    stopSubscriptionOfChecklistTemplates: PropTypes.func.isRequired,
     enterEditMode: PropTypes.func.isRequired,
     exitEditMode: PropTypes.func.isRequired,
     toggleItemSelectionInEditMode: PropTypes.func.isRequired,
@@ -56,21 +56,21 @@ class ChecklistTemplateIndexPage extends React.Component {
   };
 
   static defaultProps = {
-    listOfChecklists: null,
-    idOfNewlyCreatedChecklist: '',
+    listOfChecklistTemplates: null,
+    idOfNewlyCreatedChecklistTemplate: '',
     listOfSelectedItemsInEditMode: [],
   };
 
   componentDidMount () {
-    this.props.subscribeChecklists();
+    this.props.subscribeChecklistTemplates();
   }
 
   componentWillUnmount () {
-    this.props.stopSubscriptionOfChecklists();
+    this.props.stopSubscriptionOfChecklistTemplates();
   }
 
   onClickCreateChecklist = () => {
-    this.props.requestToCreateNewChecklist();
+    this.props.requestToCreateNewChecklistTemplate();
   };
 
   onClickEnterEditModeButton = () => {
@@ -87,25 +87,25 @@ class ChecklistTemplateIndexPage extends React.Component {
 
   onClickSelectAllItemsInEditModeButton = () => {
     const {
-      listOfChecklists,
+      listOfChecklistTemplates,
       listOfSelectedItemsInEditMode,
       isItemSelectedInEditMode,
       toggleItemSelectionInEditMode,
     } = this.props;
 
-    if (!listOfChecklists) {
+    if (!listOfChecklistTemplates) {
       return;
     }
 
-    if (listOfSelectedItemsInEditMode.length < listOfChecklists.length) {
+    if (listOfSelectedItemsInEditMode.length < listOfChecklistTemplates.length) {
       // Select the rest.
-      const listOfItemsToSelect = listOfChecklists.filter((doc) => !isItemSelectedInEditMode(doc._id));
+      const listOfItemsToSelect = listOfChecklistTemplates.filter((doc) => !isItemSelectedInEditMode(doc._id));
       const listOfItemIds = listOfItemsToSelect.map((doc) => doc._id);
 
       toggleItemSelectionInEditMode(listOfItemIds);
     } else {
       // Deselect all.
-      const listOfItemIds = listOfChecklists.map((doc) => doc._id);
+      const listOfItemIds = listOfChecklistTemplates.map((doc) => doc._id);
 
       toggleItemSelectionInEditMode(listOfItemIds);
     }
@@ -114,18 +114,18 @@ class ChecklistTemplateIndexPage extends React.Component {
   onClickDeleteSelectedInEditModeButton = () => {
     const {
       listOfSelectedItemsInEditMode,
-      requestToRemoveChecklists,
+      requestToRemoveChecklistTemplates,
     } = this.props;
 
-    requestToRemoveChecklists(listOfSelectedItemsInEditMode);
+    requestToRemoveChecklistTemplates(listOfSelectedItemsInEditMode);
   };
 
   renderAppBar () {
     const {
       classes,
-      isChecklistListDataLoading,
-      isChecklistListDataReady,
-      listOfChecklists,
+      isChecklistTemplateListDataLoading,
+      isChecklistTemplateListDataReady,
+      listOfChecklistTemplates,
       isInEditMode,
       listOfSelectedItemsInEditMode,
     } = this.props;
@@ -175,9 +175,9 @@ class ChecklistTemplateIndexPage extends React.Component {
                     root: classes.appBarIconButton,
                   }}
                   disabled={![
-                    isChecklistListDataReady,
-                    listOfChecklists,
-                    listOfChecklists.length > 0,
+                    isChecklistTemplateListDataReady,
+                    listOfChecklistTemplates,
+                    listOfChecklistTemplates.length > 0,
                   ].every(Boolean)}
                   onClick={this.onClickEnterEditModeButton}
                 >
@@ -225,7 +225,7 @@ class ChecklistTemplateIndexPage extends React.Component {
           )}
         </AppBar>
         <AppBarLoadingProgress
-          show={isChecklistListDataLoading}
+          show={isChecklistTemplateListDataLoading}
         />
       </React.Fragment>
     );
@@ -233,16 +233,16 @@ class ChecklistTemplateIndexPage extends React.Component {
 
   renderRedirects () {
     const {
-      idOfNewlyCreatedChecklist,
+      idOfNewlyCreatedChecklistTemplate,
       getUriPathToChecklistTemplateItem,
     } = this.props;
 
     return (
       <React.Fragment>
-        {idOfNewlyCreatedChecklist && (
+        {idOfNewlyCreatedChecklistTemplate && (
           <Redirect
             push
-            to={getUriPathToChecklistTemplateItem(idOfNewlyCreatedChecklist)}
+            to={getUriPathToChecklistTemplateItem(idOfNewlyCreatedChecklistTemplate)}
           />
         )}
       </React.Fragment>
@@ -251,13 +251,13 @@ class ChecklistTemplateIndexPage extends React.Component {
 
   renderModals () {
     const {
-      isCreatingNewChecklist,
+      isCreatingNewChecklistTemplate,
     } = this.props;
 
     return (
       <React.Fragment>
         <FullScreenSpinner
-          open={isCreatingNewChecklist}
+          open={isCreatingNewChecklistTemplate}
         />
       </React.Fragment>
     );
@@ -266,8 +266,8 @@ class ChecklistTemplateIndexPage extends React.Component {
   renderList () {
     const {
       classes,
-      isChecklistListDataReady,
-      listOfChecklists,
+      isChecklistTemplateListDataReady,
+      listOfChecklistTemplates,
       isInEditMode,
 
       isItemSelectedInEditMode,
@@ -277,11 +277,11 @@ class ChecklistTemplateIndexPage extends React.Component {
     return (
       <React.Fragment>
         {[
-          isChecklistListDataReady,
-          listOfChecklists,
+          isChecklistTemplateListDataReady,
+          listOfChecklistTemplates,
         ].every(Boolean) && (
           <List>
-            {listOfChecklists.map(({
+            {listOfChecklistTemplates.map(({
               _id,
               name,
               stepCount,

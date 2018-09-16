@@ -37,12 +37,12 @@ const styles = (/* theme */) => ({
 export default connect(
   // mapStateToProps
   (state/* , ownProps */) => {
-    const isChecklistListDataLoading = objectPath.get(state, ['data.checklists.loading'], true);
-    const isChecklistListDataReady = objectPath.get(state, ['data.checklists.ready'], false);
-    const listOfChecklists = objectPath.get(state, ['data.checklists.items'], null);
+    const isChecklistTemplateListDataLoading = objectPath.get(state, ['data.checklists.loading'], true);
+    const isChecklistTemplateListDataReady = objectPath.get(state, ['data.checklists.ready'], false);
+    const listOfChecklistTemplates = objectPath.get(state, ['data.checklists.items'], null);
     const isInEditMode = objectPath.get(state, ['ui.checklist.list.inEditMode'], false);
-    const isCreatingNewChecklist = objectPath.get(state, ['ui.checklist.creatingNewChecklist'], false);
-    const idOfNewlyCreatedChecklist = objectPath.get(state, ['ui.checklist.idOfNewlyCreatedChecklist']);
+    const isCreatingNewChecklistTemplate = objectPath.get(state, ['ui.checklist.creatingNewChecklist'], false);
+    const idOfNewlyCreatedChecklistTemplate = objectPath.get(state, ['ui.checklist.idOfNewlyCreatedChecklist']);
     const selectionInEditMode = isInEditMode ? objectPath.get(state, ['ui.checklist.list.editMode.selection'], {}) : {};
     const isItemSelectedInEditMode = (itemId) => {
       const isItemSelected = objectPath.get(selectionInEditMode, [itemId], false);
@@ -50,12 +50,12 @@ export default connect(
       return isItemSelected;
     };
     const listOfSelectedItemsInEditMode = [
-      isChecklistListDataReady,
-      listOfChecklists,
+      isChecklistTemplateListDataReady,
+      listOfChecklistTemplates,
       isInEditMode,
     ].every(Boolean)
       ? (
-        listOfChecklists.filter((doc) => isItemSelectedInEditMode(doc._id))
+        listOfChecklistTemplates.filter((doc) => isItemSelectedInEditMode(doc._id))
           .map((doc) => doc._id)
       )
       : [];
@@ -65,12 +65,12 @@ export default connect(
     };
 
     return {
-      isChecklistListDataLoading,
-      isChecklistListDataReady,
-      listOfChecklists,
+      isChecklistTemplateListDataLoading,
+      isChecklistTemplateListDataReady,
+      listOfChecklistTemplates,
       isInEditMode,
-      isCreatingNewChecklist,
-      idOfNewlyCreatedChecklist,
+      isCreatingNewChecklistTemplate,
+      idOfNewlyCreatedChecklistTemplate,
       listOfSelectedItemsInEditMode,
 
       isItemSelectedInEditMode,
@@ -95,7 +95,7 @@ export default connect(
         itemIds,
       });
     },
-    requestToCreateNewChecklist: () => {
+    requestToCreateNewChecklistTemplate: () => {
       const newChecklist = {};
 
       dispatch({
@@ -114,14 +114,14 @@ export default connect(
         });
       });
     },
-    requestToRemoveChecklists: (idOfChecklists) => {
+    requestToRemoveChecklistTemplates: (idOfChecklists) => {
       //! Need to remove these items from selection.
 
       removeChecklists.call({
         ids: idOfChecklists,
       });
     },
-    subscribeChecklists: () => {
+    subscribeChecklistTemplates: () => {
       dispatch({
         type: getAction('data.checklistTemplate.index.subscribe').type,
         onListUpdate: (list) => {
@@ -132,7 +132,7 @@ export default connect(
         },
       });
     },
-    stopSubscriptionOfChecklists: () => {
+    stopSubscriptionOfChecklistTemplates: () => {
       dispatch({
         type: getAction('data.checklistTemplate.index.terminateSubscription').type,
       });
