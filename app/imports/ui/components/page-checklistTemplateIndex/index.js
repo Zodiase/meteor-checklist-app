@@ -8,6 +8,10 @@ import {
 } from '@material-ui/core/styles';
 
 import {
+  getUriPathToChecklistTemplateItem,
+} from '/imports/ui/routes';
+
+import {
   getAction,
 } from '/imports/ui/reduxStore';
 
@@ -59,10 +63,6 @@ export default connect(
           .map((doc) => doc._id)
       )
       : [];
-
-    const getUriPathToChecklistTemplateItem = (id) => {
-      return `/checklist/item/${id}`;
-    };
 
     return {
       isChecklistTemplateListDataLoading,

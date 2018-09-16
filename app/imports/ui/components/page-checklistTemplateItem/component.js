@@ -53,6 +53,9 @@ class ChecklistTemplateItemPage extends React.Component {
       message: PropTypes.string.isRequired,
     }),
 
+    getUriPathToHome: PropTypes.func.isRequired,
+    getUriPathToChecklistTemplateList: PropTypes.func.isRequired,
+
     markNewlyCreatedChecklistAsOpen: PropTypes.func.isRequired,
     subscribeChecklist: PropTypes.func.isRequired,
     stopSubscriptionOfChecklist: PropTypes.func.isRequired,
@@ -302,6 +305,7 @@ class ChecklistTemplateItemPage extends React.Component {
     const {
       isChecklistDocumentLoaded,
       checklistDocument,
+      getUriPathToHome,
     } = this.props;
     const {
       copyOfChecklistDocument,
@@ -313,7 +317,7 @@ class ChecklistTemplateItemPage extends React.Component {
     && (
       <Redirect
         push
-        to="/"
+        to={getUriPathToHome()}
       />
     );
   }
@@ -324,6 +328,7 @@ class ChecklistTemplateItemPage extends React.Component {
       isLoadingChecklistDocument,
       isChecklistDocumentLoaded,
       checklistDocument,
+      getUriPathToChecklistTemplateList,
     } = this.props;
     const {
       isEditingChecklistName,
@@ -348,7 +353,7 @@ class ChecklistTemplateItemPage extends React.Component {
             <Toolbar>
               <AppBarBackButton
                 component={Link}
-                to="/checklist/index"
+                to={getUriPathToChecklistTemplateList()}
               />
 
               <Typography

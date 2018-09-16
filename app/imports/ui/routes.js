@@ -6,6 +6,7 @@ import {
   Link,
   Redirect,
   matchPath,
+  generatePath,
 } from 'react-router-dom';
 import Head from '/imports/ui/components/head';
 import ChecklistTemplateIndexPage from '/imports/ui/components/page-checklistTemplateIndex';
@@ -18,17 +19,15 @@ import {
   getAction,
 } from '/imports/ui/reduxStore';
 
-const switchRouteConfigs = [
-  {
-    name: 'homePage',
+const mapOfRoutes = {
+  homePage: {
     routeProps: {
       exact: true,
       path: '/',
       component: () => <Redirect to="/checklist/index" />,
     },
   },
-  {
-    name: 'checklistTemplateIndexPage',
+  checklistTemplateIndexPage: {
     routeProps: {
       exact: true,
       path: '/checklist/index',
@@ -43,8 +42,7 @@ const switchRouteConfigs = [
       });
     },
   },
-  {
-    name: 'checklistTemplateItemPage',
+  checklistTemplateItemPage: {
     routeProps: {
       exact: true,
       path: '/checklist/item/:id',
@@ -70,12 +68,52 @@ const switchRouteConfigs = [
       });
     },
   },
-  {
-    name: '404Page',
+  '404Page': {
     routeProps: {
       component: () => <Link to="/">404</Link>,
     },
   },
+};
+
+const getRouteByName = (name) => {
+  const route = mapOfRoutes[name];
+
+  if (!route) {
+    return null;
+  }
+
+  return {
+    ...route,
+    name,
+  };
+};
+
+export
+const getUriPathOfRoute = (name, keys = {}) => {
+  const {
+    routeProps,
+  } = getRouteByName(name);
+  const pathTemplate = routeProps.path;
+
+  return generatePath(pathTemplate, keys);
+};
+
+export
+const getUriPathToHome = () => getUriPathOfRoute('homePage');
+
+export
+const getUriPathToChecklistTemplateList = () => getUriPathOfRoute('checklistTemplateIndexPage');
+
+export
+const getUriPathToChecklistTemplateItem = (id) => getUriPathOfRoute('checklistTemplateItemPage', {
+  id,
+});
+
+const switchRouteConfigs = [
+  getRouteByName('homePage'),
+  getRouteByName('checklistTemplateIndexPage'),
+  getRouteByName('checklistTemplateItemPage'),
+  getRouteByName('404Page'),
 ];
 
 export

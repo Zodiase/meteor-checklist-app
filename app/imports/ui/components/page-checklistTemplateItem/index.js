@@ -8,6 +8,11 @@ import {
 } from '@material-ui/core/styles';
 
 import {
+  getUriPathToHome,
+  getUriPathToChecklistTemplateList,
+} from '/imports/ui/routes';
+
+import {
   getAction,
 } from '/imports/ui/reduxStore';
 
@@ -87,6 +92,9 @@ export default connect(
       isNewlyCreatedChecklist,
       isWaitingConfirmationOfNewStep,
       errorWhenCreatingNewStep,
+
+      getUriPathToHome,
+      getUriPathToChecklistTemplateList,
     };
   },
   // mapDispatchToProps
