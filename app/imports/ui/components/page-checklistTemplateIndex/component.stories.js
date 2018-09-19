@@ -3,7 +3,7 @@ import { HashRouter } from 'react-router-dom';
 import { storiesOf } from '@storybook/react';
 import { linkTo } from '@storybook/addon-links';
 import { action } from '@storybook/addon-actions';
-import ChecklistTemplateIndexPage from '/imports/ui/components/page-checklistTemplateIndex/styled';
+import ChecklistTemplateIndexPage from './styled';
 
 storiesOf('ChecklistTemplateIndexPage', module)
   .add('empty', () => (
