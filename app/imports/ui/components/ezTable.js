@@ -6,19 +6,21 @@ export default class NewComponent extends React.Component {
   static propTypes = {
     data: PropTypes.arrayOf(PropTypes.object).isRequired,
     idField: PropTypes.string,
-    columns: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string,
-      field: PropTypes.string.isRequired,
-      // Transform field value to the display content.
-      transform: PropTypes.func,
-      // General style for the column.
-      style: PropTypes.object,
-      // Style specific for the header row.
-      headerStyle: PropTypes.object,
-      // Style specific for the body rows.
-      bodyStyle: PropTypes.object,
-    })).isRequired,
+    columns: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        title: PropTypes.string,
+        field: PropTypes.string.isRequired,
+        // Transform field value to the display content.
+        transform: PropTypes.func,
+        // General style for the column.
+        style: PropTypes.object,
+        // Style specific for the header row.
+        headerStyle: PropTypes.object,
+        // Style specific for the body rows.
+        bodyStyle: PropTypes.object,
+      }),
+    ).isRequired,
   };
 
   static defaultProps = {
@@ -50,7 +52,9 @@ export default class NewComponent extends React.Component {
     const itemId = item[this.props.idField];
 
     return (
-      <tr key={`item__${itemId}`}>{this.props.columns.map((col) => this.renderColumnCell(item, col))}</tr>
+      <tr key={`item__${itemId}`}>
+        {this.props.columns.map((col) => this.renderColumnCell(item, col))}
+      </tr>
     );
   };
 
@@ -66,13 +70,15 @@ export default class NewComponent extends React.Component {
     </td>
   );
 
-  renderHeaderRow () {
+  renderHeaderRow() {
     return (
-      <tr key="header">{this.props.columns.map(this.renderHeaderColumnCell)}</tr>
+      <tr key="header">
+        {this.props.columns.map(this.renderHeaderColumnCell)}
+      </tr>
     );
   }
 
-  render () {
+  render() {
     return (
       <table>
         <thead>{this.renderHeaderRow()}</thead>

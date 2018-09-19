@@ -1,6 +1,4 @@
-import {
-  registerAction,
-} from '/imports/ui/reduxStore';
+import { registerAction } from '/imports/ui/reduxStore';
 
 registerAction({
   type: 'asyncTask.register',
@@ -22,12 +20,7 @@ registerAction({
       defaultValue: null,
     },
   },
-  reducer: (state, {
-    name,
-    task,
-    onReady,
-    onError,
-  }) => {
+  reducer: (state, { name, task, onReady, onError }) => {
     task.then(onReady, onError);
 
     return {
@@ -62,11 +55,7 @@ registerAction({
       optional: true,
     },
   },
-  reducer: (state, {
-    name,
-    data,
-    error,
-  }) => {
+  reducer: (state, { name, data, error }) => {
     return {
       ...state,
 
@@ -78,10 +67,12 @@ registerAction({
 
           inProgress: false,
           resolvedOn: Date.now(),
-          error: error ? {
-            name: error.name,
-            message: error.message,
-          } : null,
+          error: error
+            ? {
+                name: error.name,
+                message: error.message,
+              }
+            : null,
           data,
         },
       },

@@ -1,7 +1,6 @@
 let legends = {};
 
-export
-const registerLegends = (moreLegends) => {
+export const registerLegends = (moreLegends) => {
   legends = {
     ...legends,
     ...moreLegends,
@@ -10,7 +9,6 @@ const registerLegends = (moreLegends) => {
   return legends;
 };
 
-export
-const printLegends = () => {
+export const printLegends = () => {
   console.log(JSON.stringify(legends, null, 2));
 };

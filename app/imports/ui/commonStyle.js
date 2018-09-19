@@ -1,5 +1,4 @@
-export
-const appBarLoadingProgress = {
+export const appBarLoadingProgress = {
   'appBarLoadingProgress.wrapper': {
     height: '8px',
   },
@@ -8,8 +7,7 @@ const appBarLoadingProgress = {
   },
 };
 
-export
-const appBarBackButton = {
+export const appBarBackButton = {
   'appBarBackButton.root': {
     marginLeft: -12,
     marginRight: 4,

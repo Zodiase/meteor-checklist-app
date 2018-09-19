@@ -1,5 +1,4 @@
-export
-const createAndModifyDates = {
+export const createAndModifyDates = {
   createDate: {
     type: Date,
   },

@@ -1,8 +1,6 @@
 import Raven from 'raven';
 
-import {
-  sentryDsn,
-} from '/imports/consts.server';
+import { sentryDsn } from '/imports/consts.server';
 
 if (sentryDsn) {
   Raven.config(sentryDsn, {

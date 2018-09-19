@@ -8,43 +8,34 @@ import {
   ClientSideCreationSchema,
   transformForIndex,
 } from './schema';
-import {
-  sortByCreateDate,
-} from './consts';
+import { sortByCreateDate } from './consts';
 
-export
-const count = createMethod({
+export const count = createMethod({
   name: 'checklists.methods.count',
-  method () {
+  method() {
     return Checklists.find().count();
   },
 });
 
-export
-const getAll = createMethod({
+export const getAll = createMethod({
   name: 'checklists.methods.getAll',
-  method () {
+  method() {
     return Checklists.find(
       {},
       {
-        sort: [
-          sortByCreateDate,
-        ],
+        sort: [sortByCreateDate],
       },
     ).fetch();
   },
 });
 
-export
-const getAllForIndex = createMethod({
+export const getAllForIndex = createMethod({
   name: 'checklists.methods.getAllForIndex',
-  method () {
+  method() {
     const docs = Checklists.find(
       {},
       {
-        sort: [
-          sortByCreateDate,
-        ],
+        sort: [sortByCreateDate],
         transform: transformForIndex,
       },
     ).fetch();
@@ -53,15 +44,12 @@ const getAllForIndex = createMethod({
   },
 });
 
-export
-const findById = createMethod({
+export const findById = createMethod({
   name: 'checklists.methods.findById',
   schema: {
     id: String,
   },
-  method ({
-    id,
-  }) {
+  method({ id }) {
     const doc = Checklists.findOne({
       _id: id,
     });
@@ -70,11 +58,10 @@ const findById = createMethod({
   },
 });
 
-export
-const createNew = createMethod({
+export const createNew = createMethod({
   name: 'checklists.methods.createNew',
   schema: ClientSideCreationSchema,
-  method (checklist) {
+  method(checklist) {
     const date = new Date();
     const fullDocumentToInsert = {
       ...checklist,
@@ -91,17 +78,13 @@ const createNew = createMethod({
   },
 });
 
-export
-const update = createMethod({
+export const update = createMethod({
   name: 'checklists.methods.update',
   schema: {
     id: String,
     changes: ClientSideCreationSchema,
   },
-  method ({
-    id,
-    changes,
-  }) {
+  method({ id, changes }) {
     const updateCount = Checklists.update(
       {
         _id: id,
@@ -119,15 +102,12 @@ const update = createMethod({
   },
 });
 
-export
-const remove = createMethod({
+export const remove = createMethod({
   name: 'checklists.methods.remove',
   schema: {
     ids: [String],
   },
-  method ({
-    ids,
-  }) {
+  method({ ids }) {
     const deleteCount = Checklists.remove({
       _id: {
         $in: ids,
@@ -140,17 +120,13 @@ const remove = createMethod({
   },
 });
 
-export
-const updateName = createMethod({
+export const updateName = createMethod({
   name: 'checklists.methods.updateName',
   schema: {
     idOfChecklist: String,
     newName: String,
   },
-  method ({
-    idOfChecklist,
-    newName,
-  }) {
+  method({ idOfChecklist, newName }) {
     const updateCount = Checklists.update(
       {
         _id: idOfChecklist,
@@ -169,17 +145,13 @@ const updateName = createMethod({
   },
 });
 
-export
-const addStep = createMethod({
+export const addStep = createMethod({
   name: 'checklists.methods.addStep',
   schema: {
     idOfChecklist: String,
     step: ClientSideCreationStepSchema,
   },
-  method ({
-    idOfChecklist,
-    step,
-  }) {
+  method({ idOfChecklist, step }) {
     const updateCount = Checklists.update(
       {
         _id: idOfChecklist,
@@ -201,19 +173,14 @@ const addStep = createMethod({
   },
 });
 
-export
-const updateStepDescription = createMethod({
+export const updateStepDescription = createMethod({
   name: 'checklists.methods.updateStepDescription',
   schema: {
     idOfChecklist: String,
     stepId: String,
     newDescription: String,
   },
-  method ({
-    idOfChecklist,
-    stepId,
-    newDescription,
-  }) {
+  method({ idOfChecklist, stepId, newDescription }) {
     const updateCount = Checklists.update(
       {
         _id: idOfChecklist,
@@ -233,17 +200,13 @@ const updateStepDescription = createMethod({
   },
 });
 
-export
-const removeStep = createMethod({
+export const removeStep = createMethod({
   name: 'checklists.methods.removeStep',
   schema: {
     idOfChecklist: String,
     stepId: String,
   },
-  method ({
-    idOfChecklist,
-    stepId,
-  }) {
+  method({ idOfChecklist, stepId }) {
     const selector = {
       _id: idOfChecklist,
     };
@@ -255,16 +218,15 @@ const removeStep = createMethod({
       };
     }
 
-    const newSteps = checklist.steps.filter((someStep) => someStep.id !== stepId);
-
-    const updateCount = Checklists.update(
-      selector,
-      {
-        $set: {
-          steps: newSteps,
-        },
-      },
+    const newSteps = checklist.steps.filter(
+      (someStep) => someStep.id !== stepId,
     );
+
+    const updateCount = Checklists.update(selector, {
+      $set: {
+        steps: newSteps,
+      },
+    });
 
     return {
       success: updateCount > 0,
@@ -272,19 +234,14 @@ const removeStep = createMethod({
   },
 });
 
-export
-const reorderStep = createMethod({
+export const reorderStep = createMethod({
   name: 'checklists.methods.reorderStep',
   schema: {
     idOfChecklist: String,
     oldIndex: Number,
     newIndex: Number,
   },
-  method ({
-    idOfChecklist,
-    oldIndex,
-    newIndex,
-  }) {
+  method({ idOfChecklist, oldIndex, newIndex }) {
     const selector = {
       _id: idOfChecklist,
     };
@@ -305,14 +262,11 @@ const reorderStep = createMethod({
     const newSteps = checklist.steps.slice();
     newSteps.splice(newIndex, 0, newSteps.splice(oldIndex, 1)[0]);
 
-    const updateCount = Checklists.update(
-      selector,
-      {
-        $set: {
-          steps: newSteps,
-        },
+    const updateCount = Checklists.update(selector, {
+      $set: {
+        steps: newSteps,
       },
-    );
+    });
 
     return {
       success: updateCount > 0,

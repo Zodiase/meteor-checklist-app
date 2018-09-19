@@ -4,16 +4,11 @@ import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
 import BackIcon from '@material-ui/icons/KeyboardArrowLeft';
 
-import {
-  appBarBackButton,
-} from '/imports/ui/commonStyle';
+import { appBarBackButton } from '/imports/ui/commonStyle';
 
 class AppBarBackButton extends React.PureComponent {
-  render () {
-    const {
-      classes,
-      ...otherProps
-    } = this.props;
+  render() {
+    const { classes, ...otherProps } = this.props;
 
     return (
       <IconButton
@@ -22,7 +17,6 @@ class AppBarBackButton extends React.PureComponent {
         }}
         color="inherit"
         aria-label="Back"
-
         {...otherProps}
       >
         <BackIcon />

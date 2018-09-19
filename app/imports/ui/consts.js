@@ -1,5 +1,3 @@
-export
-const appName = 'Checklist';
+export const appName = 'Checklist';
 
-export
-const voidChecklistName = 'Untitled checklist';
+export const voidChecklistName = 'Untitled checklist';

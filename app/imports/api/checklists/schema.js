@@ -1,11 +1,8 @@
 import SimpleSchema from 'simpl-schema';
 
-import {
-  createAndModifyDates,
-} from '../commonSchemaFields';
+import { createAndModifyDates } from '../commonSchemaFields';
 
-export
-const ClientSideCreationStepSchema = new SimpleSchema({
+export const ClientSideCreationStepSchema = new SimpleSchema({
   description: {
     type: String,
     min: 1,
@@ -13,8 +10,7 @@ const ClientSideCreationStepSchema = new SimpleSchema({
   },
 });
 
-export
-const StoredStepSchema = new SimpleSchema({
+export const StoredStepSchema = new SimpleSchema({
   ...ClientSideCreationStepSchema.schema(),
   id: {
     type: String,
@@ -23,42 +19,39 @@ const StoredStepSchema = new SimpleSchema({
   },
 });
 
-export
 // Schema of data actually stored in server database.
-const StoredSchema = new SimpleSchema({
-  ...createAndModifyDates,
+export const StoredSchema = new SimpleSchema(
+  {
+    ...createAndModifyDates,
 
-  name: {
-    type: String,
-    max: 256,
-    trim: true,
-    defaultValue: '',
+    name: {
+      type: String,
+      max: 256,
+      trim: true,
+      defaultValue: '',
+    },
+    steps: {
+      type: Array,
+      defaultValue: [],
+    },
+    'steps.$': StoredStepSchema,
   },
-  steps: {
-    type: Array,
-    defaultValue: [],
+  {
+    clean: {
+      removeEmptyStrings: false,
+    },
   },
-  'steps.$': StoredStepSchema,
-}, {
-  clean: {
-    removeEmptyStrings: false,
-  },
-});
+);
 
-export
 // Schema of data fetched from database, which includes auto-generated fields.
-const FetchedSchema = new SimpleSchema({
+export const FetchedSchema = new SimpleSchema({
   ...StoredSchema.schema(),
 
   stepCount: {
     type: Number,
     optional: true,
-    autoValue () {
-      const {
-        isSet,
-        value,
-        operator,
-      } = this.field('steps');
+    autoValue() {
+      const { isSet, value, operator } = this.field('steps');
 
       if (isSet && operator === null) {
         return value.length;
@@ -69,32 +62,24 @@ const FetchedSchema = new SimpleSchema({
   },
 });
 
-export
 // Schema of data submitted from client side.
-const ClientSideCreationSchema = StoredSchema.pick(
-  'name',
-  'steps',
-);
+export const ClientSideCreationSchema = StoredSchema.pick('name', 'steps');
 
-export
 // Schema of the checklist when displayed in an index (no detail).
-const IndexSchema = StoredSchema.omit('steps')
-  .extend({
-    stepCount: {
-      type: Number,
-      autoValue: null,
-    },
-  });
+export const IndexSchema = StoredSchema.omit('steps').extend({
+  stepCount: {
+    type: Number,
+    autoValue: null,
+  },
+});
 
-export
-const transformToFull = (doc) => {
+export const transformToFull = (doc) => {
   const fullDoc = FetchedSchema.clean(doc);
 
   return fullDoc;
 };
 
-export
-const transformForIndex = (doc) => {
+export const transformForIndex = (doc) => {
   const fullDoc = transformToFull(doc);
   const cleanedDoc = IndexSchema.clean(fullDoc);
 

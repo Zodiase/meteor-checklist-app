@@ -3,16 +3,9 @@ import isEqual from 'lodash/isEqual';
 import objectPath from 'object-path';
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Helmet,
-} from 'react-helmet';
-import {
-  Redirect,
-  Link,
-} from 'react-router-dom';
-import {
-  arrayMove,
-} from 'react-sortable-hoc';
+import { Helmet } from 'react-helmet';
+import { Redirect, Link } from 'react-router-dom';
+import { arrayMove } from 'react-sortable-hoc';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -26,9 +19,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Snackbar from '@material-ui/core/Snackbar';
 import AddIcon from '@material-ui/icons/Add';
 
-import {
-  voidChecklistName,
-} from '/imports/ui/consts';
+import { voidChecklistName } from '/imports/ui/consts';
 
 import AppBarBackButton from '/imports/ui/components/appbar__backButton';
 import AppBarLoadingProgress from '/imports/ui/components/appbar__loadingProgress/styled';
@@ -36,8 +27,7 @@ import SortableList from '/imports/ui/components/SortableList';
 import SortableListItem from '/imports/ui/components/SortableListItem';
 import SortableHandle from '/imports/ui/components/SortableHandle';
 
-export default
-class ChecklistTemplateItemPage extends React.Component {
+export default class ChecklistTemplateItemPage extends React.Component {
   static propTypes = {
     idOfChecklist: PropTypes.string.isRequired,
     isLoadingChecklistDocument: PropTypes.bool.isRequired,
@@ -71,7 +61,7 @@ class ChecklistTemplateItemPage extends React.Component {
     errorWhenCreatingNewStep: null,
   };
 
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -94,16 +84,16 @@ class ChecklistTemplateItemPage extends React.Component {
     };
   }
 
-  static getDerivedStateFromProps (props, state) {
+  static getDerivedStateFromProps(props, state) {
     const moreState = {};
 
     // Update data copies.
     if (
       // Document loaded
-      props.isChecklistDocumentLoaded
+      props.isChecklistDocumentLoaded &&
       // and is valid
-      && props.checklistDocument
-      && !isEqual(props.checklistDocument, state.copyOfChecklistDocument)
+      props.checklistDocument &&
+      !isEqual(props.checklistDocument, state.copyOfChecklistDocument)
     ) {
       moreState.copyOfChecklistDocument = cloneDeep(props.checklistDocument);
       moreState.cachedChecklistName = cloneDeep(props.checklistDocument.name);
@@ -113,34 +103,40 @@ class ChecklistTemplateItemPage extends React.Component {
     // The checklist disappeared after loaded.
     if (
       // Document loaded
-      props.isChecklistDocumentLoaded
+      props.isChecklistDocumentLoaded &&
       // and is empty
-      && !props.checklistDocument
+      !props.checklistDocument &&
       // and was loaded.
-      && state.copyOfChecklistDocument
+      state.copyOfChecklistDocument
     ) {
       console.error('Unexpected Exception. Checklist was deleted externally.');
     }
 
     if (
       // Has error
-      props.errorWhenCreatingNewStep
+      props.errorWhenCreatingNewStep &&
       // and is a different one
-      && !isEqual(props.errorWhenCreatingNewStep, state.cachedLastErrorWhenCreatingNewStep)
+      !isEqual(
+        props.errorWhenCreatingNewStep,
+        state.cachedLastErrorWhenCreatingNewStep,
+      )
     ) {
-      moreState.cachedLastErrorWhenCreatingNewStep = cloneDeep(props.errorWhenCreatingNewStep);
+      moreState.cachedLastErrorWhenCreatingNewStep = cloneDeep(
+        props.errorWhenCreatingNewStep,
+      );
     }
 
-    moreState.isEditingChecklistName = props.isNewlyCreatedChecklist || state.isEditingChecklistName;
+    moreState.isEditingChecklistName =
+      props.isNewlyCreatedChecklist || state.isEditingChecklistName;
 
     return moreState;
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.props.subscribeChecklist();
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     const {
       isChecklistDocumentLoaded,
       isNewlyCreatedChecklist,
@@ -152,7 +148,7 @@ class ChecklistTemplateItemPage extends React.Component {
     }
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.stopSubscriptionOfChecklist();
   }
 
@@ -181,7 +177,8 @@ class ChecklistTemplateItemPage extends React.Component {
   onSubmitNewStep = (event) => {
     event.preventDefault();
 
-    const descriptionOfNewStep = this.state.transitionaryValueOfTheDescriptionOfTheNewStep;
+    const descriptionOfNewStep = this.state
+      .transitionaryValueOfTheDescriptionOfTheNewStep;
 
     this.setState({
       transitionaryValueOfTheDescriptionOfTheNewStep: '',
@@ -205,12 +202,13 @@ class ChecklistTemplateItemPage extends React.Component {
     this.exitEditModeForStep();
   };
 
-  onSortStepEnd = ({
-    oldIndex,
-    newIndex,
-  }) => {
+  onSortStepEnd = ({ oldIndex, newIndex }) => {
     this.setState({
-      cachedChecklistSteps: arrayMove(this.state.cachedChecklistSteps, oldIndex, newIndex),
+      cachedChecklistSteps: arrayMove(
+        this.state.cachedChecklistSteps,
+        oldIndex,
+        newIndex,
+      ),
     });
     this.props.reorderStep(oldIndex, newIndex);
   };
@@ -219,14 +217,15 @@ class ChecklistTemplateItemPage extends React.Component {
     this.props.acknowledgeErrorWhenCreatingNewStep();
   };
 
-  getDisplayedChecklistName () {
+  getDisplayedChecklistName() {
     return this.state.cachedChecklistName || voidChecklistName;
   }
 
   enterEditModeForChecklistName = () => {
     this.setState({
       isEditingChecklistName: true,
-      transitionaryValueOfTheNewNameOfTheChecklist: this.props.checklistDocument.name,
+      transitionaryValueOfTheNewNameOfTheChecklist: this.props.checklistDocument
+        .name,
     });
   };
 
@@ -248,15 +247,20 @@ class ChecklistTemplateItemPage extends React.Component {
       return;
     }
 
-    const step = this.props.checklistDocument.steps.find((someStep) => someStep.id === stepId);
+    const step = this.props.checklistDocument.steps.find(
+      (someStep) => someStep.id === stepId,
+    );
 
     if (!step) {
-      throw new Error(`Unable to initiate edit mode for step '${stepId}'. Step not found.`);
+      throw new Error(
+        `Unable to initiate edit mode for step '${stepId}'. Step not found.`,
+      );
     }
 
     this.setState({
       idOfStepBeingEdited: stepId,
-      transitionaryValueOfTheNewDescriptionOfTheStepBeingEdited: step.description,
+      transitionaryValueOfTheNewDescriptionOfTheStepBeingEdited:
+        step.description,
     });
   };
 
@@ -272,26 +276,26 @@ class ChecklistTemplateItemPage extends React.Component {
     }
 
     if (stepId) {
-      const step = cachedChecklistSteps.find((someStep) => someStep.id === stepId);
+      const step = cachedChecklistSteps.find(
+        (someStep) => someStep.id === stepId,
+      );
 
       if (step && step.description !== newDescription) {
-        const newCopyOfSteps = cachedChecklistSteps.map((someStep) => (
-          someStep.id === stepId
-            ? {
-              ...someStep,
-              description: newDescription,
-            }
-            : someStep
-        ));
+        const newCopyOfSteps = cachedChecklistSteps.map(
+          (someStep) =>
+            someStep.id === stepId
+              ? {
+                  ...someStep,
+                  description: newDescription,
+                }
+              : someStep,
+        );
 
         this.setState({
           cachedChecklistSteps: newCopyOfSteps,
         });
 
-        this.props.updateStepDescription(
-          stepId,
-          newDescription,
-        );
+        this.props.updateStepDescription(stepId, newDescription);
       }
     }
 
@@ -301,28 +305,22 @@ class ChecklistTemplateItemPage extends React.Component {
     });
   };
 
-  renderRedirects () {
+  renderRedirects() {
     const {
       isChecklistDocumentLoaded,
       checklistDocument,
       getUriPathToHome,
     } = this.props;
-    const {
-      copyOfChecklistDocument,
-    } = this.state;
+    const { copyOfChecklistDocument } = this.state;
 
-    return isChecklistDocumentLoaded
-    && !checklistDocument
-    && !copyOfChecklistDocument
-    && (
-      <Redirect
-        push
-        to={getUriPathToHome()}
-      />
+    return (
+      isChecklistDocumentLoaded &&
+      !checklistDocument &&
+      !copyOfChecklistDocument && <Redirect push to={getUriPathToHome()} />
     );
   }
 
-  renderAppBar () {
+  renderAppBar() {
     const {
       classes,
       isLoadingChecklistDocument,
@@ -341,15 +339,12 @@ class ChecklistTemplateItemPage extends React.Component {
       <React.Fragment>
         <Helmet>
           <title>Loading...</title>
-          {isChecklistDocumentLoaded && checklistDocument && (
-            <title>{displayedChecklistName}</title>
-          )}
+          {isChecklistDocumentLoaded &&
+            checklistDocument && <title>{displayedChecklistName}</title>}
         </Helmet>
 
         <AppBar position="static">
-          <form
-            onSubmit={this.onSubmitEditsForChecklistName}
-          >
+          <form onSubmit={this.onSubmitEditsForChecklistName}>
             <Toolbar>
               <AppBarBackButton
                 component={Link}
@@ -363,65 +358,69 @@ class ChecklistTemplateItemPage extends React.Component {
                   flex: 1,
                 }}
               >
-                {isChecklistDocumentLoaded && checklistDocument && !isEditingChecklistName && (
-                  <Button
-                    classes={{
-                      root: classes.appBarTitleButton,
-                    }}
-                    fullWidth
-                    onClick={this.enterEditModeForChecklistName}
-                  >
-                    {displayedChecklistName}
-                  </Button>
-                )}
-                {isChecklistDocumentLoaded && checklistDocument && isEditingChecklistName && (
-                  <TextField
-                    autoFocus
-                    placeholder={voidChecklistName}
-                    value={transitionaryValueOfTheNewNameOfTheChecklist}
-                    onChange={this.onChangeChecklistName}
-                    onBlur={this.exitEditModeForChecklistName}
-                    margin="none"
-                    InputProps={{
-                      classes: {
-                        root: classes['appBarTitleTextField.root'],
-                        underline: classes['appBarTitleTextField.underline'],
-                      },
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <CircularProgress
-                            size={24}
-                            thickness={5}
-                            color="inherit"
-                            variant={isSavingChanges ? 'indeterminate' : 'determinate'}
-                            value={isSavingChanges ? 0 : 100}
-                            style={{
-                              transition: 'opacity 60ms ease-out 0.9s',
-                              opacity: isSavingChanges ? 1 : 0,
-                            }}
-                          />
-                        </InputAdornment>
-                      ),
-                    }}
-                    fullWidth
-                  />
-                )}
-                {!isChecklistDocumentLoaded && (
-                  <span>Loading...</span>
-                )}
+                {isChecklistDocumentLoaded &&
+                  checklistDocument &&
+                  !isEditingChecklistName && (
+                    <Button
+                      classes={{
+                        root: classes.appBarTitleButton,
+                      }}
+                      fullWidth
+                      onClick={this.enterEditModeForChecklistName}
+                    >
+                      {displayedChecklistName}
+                    </Button>
+                  )}
+                {isChecklistDocumentLoaded &&
+                  checklistDocument &&
+                  isEditingChecklistName && (
+                    <TextField
+                      autoFocus
+                      placeholder={voidChecklistName}
+                      value={transitionaryValueOfTheNewNameOfTheChecklist}
+                      onChange={this.onChangeChecklistName}
+                      onBlur={this.exitEditModeForChecklistName}
+                      margin="none"
+                      InputProps={{
+                        classes: {
+                          root: classes['appBarTitleTextField.root'],
+                          underline: classes['appBarTitleTextField.underline'],
+                        },
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <CircularProgress
+                              size={24}
+                              thickness={5}
+                              color="inherit"
+                              variant={
+                                isSavingChanges
+                                  ? 'indeterminate'
+                                  : 'determinate'
+                              }
+                              value={isSavingChanges ? 0 : 100}
+                              style={{
+                                transition: 'opacity 60ms ease-out 0.9s',
+                                opacity: isSavingChanges ? 1 : 0,
+                              }}
+                            />
+                          </InputAdornment>
+                        ),
+                      }}
+                      fullWidth
+                    />
+                  )}
+                {!isChecklistDocumentLoaded && <span>Loading...</span>}
               </Typography>
             </Toolbar>
           </form>
         </AppBar>
 
-        <AppBarLoadingProgress
-          show={isLoadingChecklistDocument}
-        />
+        <AppBarLoadingProgress show={isLoadingChecklistDocument} />
       </React.Fragment>
     );
   }
 
-  renderStepList () {
+  renderStepList() {
     const {
       classes,
       isChecklistDocumentLoaded,
@@ -443,28 +442,19 @@ class ChecklistTemplateItemPage extends React.Component {
         useDragHandle
         onSortEnd={this.onSortStepEnd}
       >
-        <form
-          onSubmit={this.onSubmitEditsForStep}
-        >
-          {isChecklistDocumentLoaded
-          && checklistDocument
-          && cachedChecklistSteps.map((step, index) => {
-            const {
-              id,
-            } = step;
+        <form onSubmit={this.onSubmitEditsForStep}>
+          {isChecklistDocumentLoaded &&
+            checklistDocument &&
+            cachedChecklistSteps.map((step, index) => {
+              const { id } = step;
 
-            return (
-              <SortableListItem
-                key={id}
-                index={index}
-              >
-                <SortableHandle
-                  className={classes.moveIndicator}
-                />
-                {this.renderListItemContentForStep(step)}
-              </SortableListItem>
-            );
-          })}
+              return (
+                <SortableListItem key={id} index={index}>
+                  <SortableHandle className={classes.moveIndicator} />
+                  {this.renderListItemContentForStep(step)}
+                </SortableListItem>
+              );
+            })}
         </form>
 
         <form
@@ -503,54 +493,47 @@ class ChecklistTemplateItemPage extends React.Component {
     );
   }
 
-  renderListItemContentForStep (step) {
-    const {
-      id,
-      description,
-    } = step;
-    const {
-      classes,
-    } = this.props;
+  renderListItemContentForStep(step) {
+    const { id, description } = step;
+    const { classes } = this.props;
     const {
       idOfStepBeingEdited,
       transitionaryValueOfTheNewDescriptionOfTheStepBeingEdited,
     } = this.state;
-    const isBeingEdited = idOfStepBeingEdited && (idOfStepBeingEdited === id);
+    const isBeingEdited = idOfStepBeingEdited && idOfStepBeingEdited === id;
 
     return (
       <ListItemText
         {...(isBeingEdited
-        ? {
-          primary: (
-            <TextField
-              classes={{
-                root: classes.stepDescriptionTextField,
-              }}
-              autoFocus
-              placeholder="Empty step will be removed"
-              value={transitionaryValueOfTheNewDescriptionOfTheStepBeingEdited}
-              onChange={this.onChangeActivelyEditedStepDescription}
-              onBlur={this.exitEditModeForStep}
-              margin="none"
-              fullWidth
-            />
-          ),
-        }
-        : {
-          primary: description,
-          onClick: () => this.enterEditModeForStep(id),
-        })}
+          ? {
+              primary: (
+                <TextField
+                  classes={{
+                    root: classes.stepDescriptionTextField,
+                  }}
+                  autoFocus
+                  placeholder="Empty step will be removed"
+                  value={
+                    transitionaryValueOfTheNewDescriptionOfTheStepBeingEdited
+                  }
+                  onChange={this.onChangeActivelyEditedStepDescription}
+                  onBlur={this.exitEditModeForStep}
+                  margin="none"
+                  fullWidth
+                />
+              ),
+            }
+          : {
+              primary: description,
+              onClick: () => this.enterEditModeForStep(id),
+            })}
       />
     );
   }
 
-  renderModals () {
-    const {
-      errorWhenCreatingNewStep,
-    } = this.props;
-    const {
-      cachedLastErrorWhenCreatingNewStep,
-    } = this.state;
+  renderModals() {
+    const { errorWhenCreatingNewStep } = this.props;
+    const { cachedLastErrorWhenCreatingNewStep } = this.state;
 
     return (
       <Snackbar
@@ -564,11 +547,11 @@ class ChecklistTemplateItemPage extends React.Component {
         ContentProps={{
           'aria-describedby': 'error-when-creating-new-step',
         }}
-        message={(
+        message={
           <span id="error-when-creating-new-step">
             {objectPath.get(cachedLastErrorWhenCreatingNewStep, 'message')}
           </span>
-        )}
+        }
         action={[
           <Button
             key="confirm"
@@ -583,8 +566,7 @@ class ChecklistTemplateItemPage extends React.Component {
     );
   }
 
-  render () {
-
+  render() {
     return (
       <React.Fragment>
         {this.renderRedirects()}

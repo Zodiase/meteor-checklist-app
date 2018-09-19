@@ -1,14 +1,9 @@
 import React from 'react';
-import {
-  SortableHandle,
-} from 'react-sortable-hoc';
+import { SortableHandle } from 'react-sortable-hoc';
 
 class SortableHandleComponent extends React.Component {
-  render () {
-    const {
-      style,
-      ...props
-    } = this.props;
+  render() {
+    const { style, ...props } = this.props;
 
     return (
       <div
@@ -22,5 +17,4 @@ class SortableHandleComponent extends React.Component {
   }
 }
 
-export default
-SortableHandle(SortableHandleComponent);
+export default SortableHandle(SortableHandleComponent);

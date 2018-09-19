@@ -1,8 +1,7 @@
 import React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-export default
-(props) => {
+export default (props) => {
   const {
     spinnerProps: {
       show: showSpinner = false,
@@ -19,7 +18,6 @@ export default
   return (
     <div
       {...otherProps}
-
       style={{
         position: 'relative',
 
@@ -29,7 +27,6 @@ export default
       {children}
       <CircularProgress
         {...otherSpinnerProps}
-
         size={spinnerSize}
         color={spinnerColor}
         variant={showSpinner ? 'indeterminate' : 'determinate'}

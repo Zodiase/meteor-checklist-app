@@ -9,29 +9,41 @@ storiesOf('ChecklistTemplateIndexPage', module)
   .add('empty', () => (
     <ChecklistTemplateIndexPage
       subscribeChecklistTemplates={action('subscribeChecklistTemplates')}
-      stopSubscriptionOfChecklistTemplates={action('stopSubscriptionOfChecklistTemplates')}
-      requestToCreateNewChecklistTemplate={action('requestToCreateNewChecklistTemplate')}
+      stopSubscriptionOfChecklistTemplates={action(
+        'stopSubscriptionOfChecklistTemplates',
+      )}
+      requestToCreateNewChecklistTemplate={action(
+        'requestToCreateNewChecklistTemplate',
+      )}
       isChecklistTemplateListDataLoading={false}
-      isChecklistTemplateListDataReady={true}
+      isChecklistTemplateListDataReady
       listOfChecklistTemplates={[]}
     />
   ))
   .add('loading', () => (
     <ChecklistTemplateIndexPage
       subscribeChecklistTemplates={action('subscribeChecklistTemplates')}
-      stopSubscriptionOfChecklistTemplates={action('stopSubscriptionOfChecklistTemplates')}
-      requestToCreateNewChecklistTemplate={action('requestToCreateNewChecklistTemplate')}
-      isChecklistTemplateListDataLoading={true}
+      stopSubscriptionOfChecklistTemplates={action(
+        'stopSubscriptionOfChecklistTemplates',
+      )}
+      requestToCreateNewChecklistTemplate={action(
+        'requestToCreateNewChecklistTemplate',
+      )}
+      isChecklistTemplateListDataLoading
     />
   ))
   .add('with items', () => (
     <HashRouter>
       <ChecklistTemplateIndexPage
         subscribeChecklistTemplates={action('subscribeChecklistTemplates')}
-        stopSubscriptionOfChecklistTemplates={action('stopSubscriptionOfChecklistTemplates')}
-        requestToCreateNewChecklistTemplate={action('requestToCreateNewChecklistTemplate')}
+        stopSubscriptionOfChecklistTemplates={action(
+          'stopSubscriptionOfChecklistTemplates',
+        )}
+        requestToCreateNewChecklistTemplate={action(
+          'requestToCreateNewChecklistTemplate',
+        )}
         isChecklistTemplateListDataLoading={false}
-        isChecklistTemplateListDataReady={true}
+        isChecklistTemplateListDataReady
         listOfChecklistTemplates={[
           {
             _id: 'item-1',

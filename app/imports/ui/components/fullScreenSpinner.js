@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import Dialog from '@material-ui/core/Dialog';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-export default
-class FullScreenSpinner extends React.PureComponent {
+export default class FullScreenSpinner extends React.PureComponent {
   static propTypes = {
     open: PropTypes.bool,
   };
@@ -13,7 +12,7 @@ class FullScreenSpinner extends React.PureComponent {
     open: false,
   };
 
-  render () {
+  render() {
     return (
       <Dialog
         disableBackdropClick
@@ -23,13 +22,10 @@ class FullScreenSpinner extends React.PureComponent {
           elevation: 5,
           style: {
             borderRadius: '50%',
-          }
+          },
         }}
       >
-        <CircularProgress
-          size={64}
-          thickness={4}
-        />
+        <CircularProgress size={64} thickness={4} />
       </Dialog>
     );
   }

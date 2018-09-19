@@ -1,15 +1,9 @@
 /* eslint no-console: off */
 
-import {
-  Meteor,
-} from 'meteor/meteor';
+import { Meteor } from 'meteor/meteor';
 
-import {
-  publicationMark,
-} from '/imports/consts.server';
-import {
-  registerLegends,
-} from '/imports/logIconLegends';
+import { publicationMark } from '/imports/consts.server';
+import { registerLegends } from '/imports/logIconLegends';
 
 registerLegends({
   'publication mark': publicationMark,
@@ -22,7 +16,7 @@ const createPublication = (pubName, pubFunc) => {
    *   so the `pubFunc` could be an arrow function.
    * - Add some helper functions to the context object.
    */
-  const realPublicationFunction = function (...subArgs) {
+  const realPublicationFunction = function(...subArgs) {
     const context = this;
 
     context.log = (...logArgs) => {
@@ -30,12 +24,7 @@ const createPublication = (pubName, pubFunc) => {
     };
 
     // Wrap each function to add logs.
-    [
-      'added',
-      'changed',
-      'removed',
-      'ready',
-    ].forEach((key) => {
+    ['added', 'changed', 'removed', 'ready'].forEach((key) => {
       context[key] = ((reactFunc) => (...changeArgs) => {
         context.log(key, JSON.stringify(changeArgs, null, 2));
 
@@ -47,10 +36,19 @@ const createPublication = (pubName, pubFunc) => {
       context.log('stopped');
     });
 
-    console.group(publicationMark, pubName, 'subscribed', JSON.stringify({
-      userId: context.userId,
-      subArgs,
-    }, null, 2));
+    console.group(
+      publicationMark,
+      pubName,
+      'subscribed',
+      JSON.stringify(
+        {
+          userId: context.userId,
+          subArgs,
+        },
+        null,
+        2,
+      ),
+    );
 
     // `pubFunc` would call `context.log`.
     const pubResult = pubFunc(context, ...subArgs);

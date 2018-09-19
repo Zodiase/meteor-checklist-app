@@ -1,11 +1,7 @@
 import objectPath from 'object-path';
 
-import {
-  registerAction,
-} from '/imports/ui/reduxStore';
-import {
-  ClientSideCreationSchema,
-} from '/imports/api/checklists/schema';
+import { registerAction } from '/imports/ui/reduxStore';
+import { ClientSideCreationSchema } from '/imports/api/checklists/schema';
 
 registerAction({
   type: 'ui.checklistTemplate.index.editMode.enter',
@@ -35,10 +31,12 @@ registerAction({
   schema: {
     itemIds: [String],
   },
-  reducer: (state, {
-    itemIds,
-  }) => {
-    const selection = objectPath.get(state, ['ui.checklist.list.editMode.selection'], {});
+  reducer: (state, { itemIds }) => {
+    const selection = objectPath.get(
+      state,
+      ['ui.checklist.list.editMode.selection'],
+      {},
+    );
 
     const newSelection = itemIds.reduce((acc, itemId) => {
       const isItemSelected = objectPath.get(selection, [itemId], false);
@@ -86,10 +84,7 @@ registerAction({
       optional: true,
     },
   },
-  reducer: (state, {
-    error,
-    response,
-  }) => {
+  reducer: (state, { error, response }) => {
     if (error) {
       return {
         ...state,
@@ -116,10 +111,11 @@ registerAction({
   schema: {
     idOfChecklist: String,
   },
-  reducer: (state, {
-    idOfChecklist,
-  }) => {
-    if (idOfChecklist && idOfChecklist !== state['ui.checklist.idOfNewlyCreatedChecklist']) {
+  reducer: (state, { idOfChecklist }) => {
+    if (
+      idOfChecklist &&
+      idOfChecklist !== state['ui.checklist.idOfNewlyCreatedChecklist']
+    ) {
       return state;
     }
 
@@ -163,17 +159,18 @@ registerAction({
       optional: true,
     },
   },
-  reducer: (state, {
-    error,
-    response,
-  }) => {
+  reducer: (state, { error, response }) => {
     if (error) {
       const uiError = {
         name: 'unknown',
         message: 'Unexpected error',
       };
 
-      if (error.error === 'validation-error' && error.details && error.details.length > 0) {
+      if (
+        error.error === 'validation-error' &&
+        error.details &&
+        error.details.length > 0
+      ) {
         uiError.name = 'ValidationError';
         uiError.message = error.details[0].message;
       }

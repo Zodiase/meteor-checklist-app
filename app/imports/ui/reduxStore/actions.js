@@ -16,7 +16,6 @@ const parseSchemaObject = (rawSchemaObject) => {
   return new SimpleSchema(rawSchemaObject);
 };
 
-export
 /**
  * Register an action.
  * @param  {string}          options.type
@@ -24,12 +23,7 @@ export
  * @param  {string|[string]} options.scopePath Optional path for the scope. If provided, the state will be the reduced scope.
  * @param  {Function}        options.reducer
  */
-const registerAction = ({
-  type,
-  schema,
-  scopePath,
-  reducer,
-}) => {
+export const registerAction = ({ type, schema, scopePath, reducer }) => {
   if (typeof type !== 'string') {
     throw new Error(`Action type must be a string. ${typeof type} received.`);
   }
@@ -43,7 +37,9 @@ const registerAction = ({
   }
 
   if (typeof reducer !== 'function') {
-    throw new Error(`Action reducer must be a function. ${typeof reducer} received.`);
+    throw new Error(
+      `Action reducer must be a function. ${typeof reducer} received.`,
+    );
   }
 
   const solidSchema = parseSchemaObject(schema);
@@ -56,12 +52,11 @@ const registerAction = ({
   };
 };
 
-export
 /**
  * @param  {string} type
  * @return {Object}
  */
-const getAction = (type) => {
+export const getAction = (type) => {
   if (!(type in mapOfActions)) {
     throw new Error(`Action not found: ${type}`);
   }
@@ -71,7 +66,6 @@ const getAction = (type) => {
   return action;
 };
 
-export
 /**
  * Find the reducer for the given action.
  * If the reducer has schema defined, the action must pass the schema
@@ -80,12 +74,8 @@ export
  * @param  {string}    options.type
  * @return {Function}
  */
-const getReducerForAction = ({type, ...payload}) => {
-  const {
-    schema,
-    scopePath,
-    reducer,
-  } = getAction(type);
+export const getReducerForAction = ({ type, ...payload }) => {
+  const { schema, scopePath, reducer } = getAction(type);
 
   if (schema) {
     try {
@@ -99,20 +89,19 @@ const getReducerForAction = ({type, ...payload}) => {
   }
 
   return scopePath
-  ? (state, action) => {
-    const nextState = cloneDeep(state);
-    const scopedState = objectPath.get(state, scopePath, {});
-    const nextScopedState = reducer(scopedState, action);
+    ? (state, action) => {
+        const nextState = cloneDeep(state);
+        const scopedState = objectPath.get(state, scopePath, {});
+        const nextScopedState = reducer(scopedState, action);
 
-    objectPath.set(nextState, scopePath, nextScopedState);
+        objectPath.set(nextState, scopePath, nextScopedState);
 
-    return nextState;
-  }
-  : reducer;
+        return nextState;
+      }
+    : reducer;
 };
 
-export
-const actionSpecificReducer = (state, action) => {
+export const actionSpecificReducer = (state, action) => {
   const reducer = getReducerForAction(action);
 
   if (!reducer) {

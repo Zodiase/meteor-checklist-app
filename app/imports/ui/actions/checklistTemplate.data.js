@@ -1,19 +1,11 @@
 import objectPath from 'object-path';
-import {
-  Meteor,
-} from 'meteor/meteor';
-import {
-  Tracker,
-} from 'meteor/tracker';
+import { Meteor } from 'meteor/meteor';
+import { Tracker } from 'meteor/tracker';
 
 import handleStorage from '/imports/handleStorage';
-import {
-  registerAction,
-} from '/imports/ui/reduxStore';
+import { registerAction } from '/imports/ui/reduxStore';
 import Checklists from '/imports/api/checklists/collections';
-import {
-  sortByCreateDate,
-} from '/imports/api/checklists/consts';
+import { sortByCreateDate } from '/imports/api/checklists/consts';
 
 const wrapJsonFriendlyChecklistDocument = (originalDoc) => {
   if (!originalDoc) {
@@ -33,9 +25,7 @@ registerAction({
   schema: {
     onListUpdate: Function,
   },
-  reducer: (state, {
-    onListUpdate,
-  }) => {
+  reducer: (state, { onListUpdate }) => {
     const handleOfSubscription = Meteor.subscribe('checklists.index');
     const handleIdOfSubscription = handleStorage.deposit(handleOfSubscription);
     const handleOfTracker = Tracker.autorun(() => {
@@ -44,9 +34,7 @@ registerAction({
       const checklistDocsCursor = Checklists.find(
         {},
         {
-          sort: [
-            sortByCreateDate,
-          ],
+          sort: [sortByCreateDate],
           // Be aware of transforming here. The data sent from server could already be transformed.
           transform: null,
         },
@@ -76,11 +64,15 @@ registerAction({
 registerAction({
   type: 'data.checklistTemplate.index.terminateSubscription',
   reducer: (state) => {
-    const handleOfSubscription = handleStorage.withdraw(state['data.checklists.handleIdOfSubscription']);
+    const handleOfSubscription = handleStorage.withdraw(
+      state['data.checklists.handleIdOfSubscription'],
+    );
 
     handleOfSubscription && handleOfSubscription.stop();
 
-    const handleOfTracker = handleStorage.withdraw(state['data.checklists.handleIdOfTracker']);
+    const handleOfTracker = handleStorage.withdraw(
+      state['data.checklists.handleIdOfTracker'],
+    );
 
     handleOfTracker && handleOfTracker.stop();
 
@@ -105,9 +97,7 @@ registerAction({
       blackbox: true,
     },
   },
-  reducer: (state, {
-    list,
-  }) => {
+  reducer: (state, { list }) => {
     return {
       ...state,
       'data.checklists.items': list,
@@ -124,13 +114,8 @@ registerAction({
     idOfChecklist: String,
     onDocumentUpdate: Function,
   },
-  scopePath: [
-    'data.checklists.documents',
-  ],
-  reducer: (scopedState, {
-    idOfChecklist,
-    onDocumentUpdate,
-  }) => {
+  scopePath: ['data.checklists.documents'],
+  reducer: (scopedState, { idOfChecklist, onDocumentUpdate }) => {
     const documentInfo = scopedState[idOfChecklist];
 
     if (documentInfo) {
@@ -200,12 +185,8 @@ registerAction({
   schema: {
     idOfChecklist: String,
   },
-  scopePath: [
-    'data.checklists.documents',
-  ],
-  reducer: (scopedState, {
-    idOfChecklist,
-  }) => {
+  scopePath: ['data.checklists.documents'],
+  reducer: (scopedState, { idOfChecklist }) => {
     const documentInfo = scopedState[idOfChecklist];
 
     // If document is never loaded, do nothing.
@@ -214,7 +195,9 @@ registerAction({
     }
 
     if (documentInfo.handleIdOfSubscription) {
-      const handleOfSubscription = handleStorage.withdraw(documentInfo.handleIdOfSubscription);
+      const handleOfSubscription = handleStorage.withdraw(
+        documentInfo.handleIdOfSubscription,
+      );
 
       if (handleOfSubscription) {
         handleOfSubscription.stop();
@@ -222,7 +205,9 @@ registerAction({
     }
 
     if (documentInfo.handleIdOfTracker) {
-      const handleOfTracker = handleStorage.withdraw(documentInfo.handleIdOfTracker);
+      const handleOfTracker = handleStorage.withdraw(
+        documentInfo.handleIdOfTracker,
+      );
 
       if (handleOfTracker) {
         handleOfTracker.stop();
@@ -251,18 +236,17 @@ registerAction({
       blackbox: true,
     },
   },
-  scopePath: [
-    'data.checklists.documents',
-  ],
-  reducer: (scopedState, {
-    idOfChecklist,
-    document,
-  }) => {
+  scopePath: ['data.checklists.documents'],
+  reducer: (scopedState, { idOfChecklist, document }) => {
     const documentInfo = scopedState[idOfChecklist];
 
     if (documentInfo) {
       const isDocumentLoading = objectPath.get(documentInfo, 'loading', false);
-      const isDocumentSubscribed = objectPath.get(documentInfo, 'subscribed', false);
+      const isDocumentSubscribed = objectPath.get(
+        documentInfo,
+        'subscribed',
+        false,
+      );
       const isPendingDocumentUpdate = isDocumentLoading || isDocumentSubscribed;
 
       // Do nothing if the document is not subscribed nor being loaded.
@@ -296,13 +280,8 @@ registerAction({
       blackbox: true,
     },
   },
-  scopePath: [
-    'data.checklists.documents',
-  ],
-  reducer: (scopedState, {
-    idOfChecklist,
-    document,
-  }) => {
+  scopePath: ['data.checklists.documents'],
+  reducer: (scopedState, { idOfChecklist, document }) => {
     return {
       ...scopedState,
 

@@ -1,5 +1,1 @@
-export
-const sortByCreateDate = [
-  'createDate',
-  'desc',
-];
+export const sortByCreateDate = ['createDate', 'desc'];

@@ -15,9 +15,7 @@ import {
   getAllForIndex as getAllChecklists,
   findById as findChecklistById,
 } from '/imports/api/checklists/methods';
-import {
-  getAction,
-} from '/imports/ui/reduxStore';
+import { getAction } from '/imports/ui/reduxStore';
 
 const mapOfRoutes = {
   homePage: {
@@ -33,7 +31,7 @@ const mapOfRoutes = {
       path: '/checklist/index',
       component: ChecklistTemplateIndexPage,
     },
-    initializingData: async (dispatch/* , props */) => {
+    initializingData: async (dispatch /* , props */) => {
       const checklists = await getAllChecklists.callPromise();
 
       dispatch({
@@ -51,9 +49,11 @@ const mapOfRoutes = {
     initializingData: async (dispatch, props) => {
       const idOfChecklist = objectPath.get(props, 'match.params.id');
 
-      let checklist = idOfChecklist && await findChecklistById.callPromise({
-        id: idOfChecklist,
-      });
+      let checklist =
+        idOfChecklist &&
+        (await findChecklistById.callPromise({
+          id: idOfChecklist,
+        }));
 
       if (!checklist) {
         // 404.
@@ -62,7 +62,8 @@ const mapOfRoutes = {
       }
 
       dispatch({
-        type: getAction('data.checklistTemplate.document.updateLocalCopy--ssr').type,
+        type: getAction('data.checklistTemplate.document.updateLocalCopy--ssr')
+          .type,
         idOfChecklist,
         document: checklist,
       });
@@ -88,26 +89,22 @@ const getRouteByName = (name) => {
   };
 };
 
-export
-const getUriPathOfRoute = (name, keys = {}) => {
-  const {
-    routeProps,
-  } = getRouteByName(name);
+export const getUriPathOfRoute = (name, keys = {}) => {
+  const { routeProps } = getRouteByName(name);
   const pathTemplate = routeProps.path;
 
   return generatePath(pathTemplate, keys);
 };
 
-export
-const getUriPathToHome = () => getUriPathOfRoute('homePage');
+export const getUriPathToHome = () => getUriPathOfRoute('homePage');
 
-export
-const getUriPathToChecklistTemplateList = () => getUriPathOfRoute('checklistTemplateIndexPage');
+export const getUriPathToChecklistTemplateList = () =>
+  getUriPathOfRoute('checklistTemplateIndexPage');
 
-export
-const getUriPathToChecklistTemplateItem = (id) => getUriPathOfRoute('checklistTemplateItemPage', {
-  id,
-});
+export const getUriPathToChecklistTemplateItem = (id) =>
+  getUriPathOfRoute('checklistTemplateItemPage', {
+    id,
+  });
 
 const switchRouteConfigs = [
   getRouteByName('homePage'),
@@ -116,10 +113,11 @@ const switchRouteConfigs = [
   getRouteByName('404Page'),
 ];
 
-export
-const initializingReduxStoreForRouteSsr = async (store, location) => {
+export const initializingReduxStoreForRouteSsr = async (store, location) => {
   const routePath = location.pathname;
-  const matchedRoute = switchRouteConfigs.find((config) => matchPath(routePath, config.routeProps));
+  const matchedRoute = switchRouteConfigs.find((config) =>
+    matchPath(routePath, config.routeProps),
+  );
 
   if (!matchedRoute || !matchedRoute.initializingData) {
     return;
@@ -140,13 +138,8 @@ export default (
   <React.Fragment>
     <Head />
     <Switch>
-      {switchRouteConfigs.map(({
-        name,
-        routeProps,
-      }) => {
-        return (
-          <Route key={name} {...routeProps} />
-        );
+      {switchRouteConfigs.map(({ name, routeProps }) => {
+        return <Route key={name} {...routeProps} />;
       })}
     </Switch>
   </React.Fragment>
