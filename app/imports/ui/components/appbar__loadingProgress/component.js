@@ -1,19 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
 import Fade from '@material-ui/core/Fade';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
-import {
-  appBarLoadingProgress,
-} from '/imports/ui/commonStyle';
-
+export default
 class AppBarLoadingProgress extends React.PureComponent {
   static propTypes = {
+    classes: PropTypes.object,
+
     show: PropTypes.bool,
   };
 
   static defaultProps = {
+    classes: {},
+
     show: false,
   };
 
@@ -41,5 +41,3 @@ class AppBarLoadingProgress extends React.PureComponent {
     );
   }
 }
-
-export default withStyles(appBarLoadingProgress)(AppBarLoadingProgress);

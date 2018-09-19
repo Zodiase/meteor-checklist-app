@@ -9,8 +9,8 @@ import {
   generatePath,
 } from 'react-router-dom';
 import Head from '/imports/ui/components/head';
-import ChecklistTemplateIndexPage from '/imports/ui/components/page-checklistTemplateIndex';
-import ChecklistTemplateItemPage from '/imports/ui/components/page-checklistTemplateItem';
+import ChecklistTemplateIndexPage from '/imports/ui/components/page-checklistTemplateIndex/connected';
+import ChecklistTemplateItemPage from '/imports/ui/components/page-checklistTemplateItem/connected';
 import {
   getAllForIndex as getAllChecklists,
   findById as findChecklistById,

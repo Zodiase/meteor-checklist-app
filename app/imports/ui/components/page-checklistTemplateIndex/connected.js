@@ -3,9 +3,6 @@ import {
   connect,
 } from 'react-redux';
 import objectPath from 'object-path';
-import {
-  withStyles,
-} from '@material-ui/core/styles';
 
 import {
   getUriPathToChecklistTemplateItem,
@@ -20,23 +17,7 @@ import {
   remove as removeChecklists,
 } from '/imports/api/checklists/methods';
 
-import Component from './component';
-
-const styles = (/* theme */) => ({
-  flex: {
-    flex: 1,
-  },
-  disabled: {},
-  editModeSelectionCheckbox: {
-    width: 20,
-    height: 20,
-  },
-  appBarIconButton: {
-    color: 'inherit',
-  },
-  appBarDefault: {},
-  appBarInEditMode: {},
-});
+import Component from './styled';
 
 export default connect(
   // mapStateToProps
@@ -138,4 +119,4 @@ export default connect(
       });
     },
   }),
-)(withStyles(styles)(Component));
+)(Component);

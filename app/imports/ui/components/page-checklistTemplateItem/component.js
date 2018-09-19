@@ -31,7 +31,7 @@ import {
 } from '/imports/ui/consts';
 
 import AppBarBackButton from '/imports/ui/components/appbar__backButton';
-import AppBarLoadingProgress from '/imports/ui/components/appbar__LoadingProgress';
+import AppBarLoadingProgress from '/imports/ui/components/appbar__loadingProgress/styled';
 import SortableList from '/imports/ui/components/SortableList';
 import SortableListItem from '/imports/ui/components/SortableListItem';
 import SortableHandle from '/imports/ui/components/SortableHandle';

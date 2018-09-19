@@ -26,21 +26,23 @@ import {
 } from '/imports/ui/consts';
 
 import AppBarBackButton from '/imports/ui/components/appbar__backButton';
-import AppBarLoadingProgress from '/imports/ui/components/appbar__LoadingProgress';
+import AppBarLoadingProgress from '/imports/ui/components/appbar__loadingProgress/styled';
 import FullScreenSpinner from '/imports/ui/components/fullScreenSpinner';
 
 export default
 class ChecklistTemplateIndexPage extends React.Component {
   static propTypes = {
-    isChecklistTemplateListDataLoading: PropTypes.bool.isRequired,
-    isChecklistTemplateListDataReady: PropTypes.bool.isRequired,
+    classes: PropTypes.object,
+
+    isChecklistTemplateListDataLoading: PropTypes.bool,
+    isChecklistTemplateListDataReady: PropTypes.bool,
     listOfChecklistTemplates: PropTypes.arrayOf(PropTypes.shape({
       _id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       stepCount: PropTypes.number.isRequired,
     })),
-    isInEditMode: PropTypes.bool.isRequired,
-    isCreatingNewChecklistTemplate: PropTypes.bool.isRequired,
+    isInEditMode: PropTypes.bool,
+    isCreatingNewChecklistTemplate: PropTypes.bool,
     idOfNewlyCreatedChecklistTemplate: PropTypes.string,
     listOfSelectedItemsInEditMode: PropTypes.arrayOf(PropTypes.string),
 
@@ -56,7 +58,13 @@ class ChecklistTemplateIndexPage extends React.Component {
   };
 
   static defaultProps = {
+    classes: {},
+
+    isChecklistTemplateListDataLoading: false,
+    isChecklistTemplateListDataReady: false,
     listOfChecklistTemplates: null,
+    isInEditMode: false,
+    isCreatingNewChecklistTemplate: false,
     idOfNewlyCreatedChecklistTemplate: '',
     listOfSelectedItemsInEditMode: [],
   };
@@ -176,8 +184,7 @@ class ChecklistTemplateIndexPage extends React.Component {
                   }}
                   disabled={![
                     isChecklistTemplateListDataReady,
-                    listOfChecklistTemplates,
-                    listOfChecklistTemplates.length > 0,
+                    listOfChecklistTemplates && listOfChecklistTemplates.length > 0,
                   ].every(Boolean)}
                   onClick={this.onClickEnterEditModeButton}
                 >
