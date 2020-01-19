@@ -1,5 +1,7 @@
 # Checklist App
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Zodiase/meteor-checklist-app.svg)](https://greenkeeper.io/)
+
 ## Why?
 
 The idea is, sometimes we need more than just a to-do list.
