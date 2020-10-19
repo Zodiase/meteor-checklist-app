@@ -16,7 +16,7 @@
     "lodash": "^4.17.10",
     "meteor-node-stubs": "^0.4.1",
     "moment": "^2.22.2",
-    "object-path": "^0.11.4",
+    "object-path": "^0.11.5",
     "pluralize": "^7.0.0",
     "prop-types": "^15.6.1",
     "raven": "^2.6.2",
