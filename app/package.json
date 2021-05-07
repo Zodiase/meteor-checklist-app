@@ -13,7 +13,7 @@
     "@material-ui/icons": "^1.1.0",
     "connected-react-router": "^4.4.1",
     "history": "^4.7.2",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.21",
     "meteor-node-stubs": "^0.4.1",
     "moment": "^2.22.2",
     "object-path": "^0.11.5",
