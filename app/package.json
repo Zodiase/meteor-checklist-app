@@ -38,7 +38,7 @@
     "@meteorjs/eslint-config-meteor": "^1.0.5",
     "@storybook/addon-actions": "^3.4.11",
     "@storybook/addon-links": "^3.4.11",
-    "@storybook/react": "^3.4.11",
+    "@storybook/react": "^6.5.13",
     "@xch/meteor-create-react-component": "^0.1.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",
